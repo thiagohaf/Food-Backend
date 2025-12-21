@@ -32,7 +32,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private UserType type;
-    
+
     @Embedded
     private Address address;
 
