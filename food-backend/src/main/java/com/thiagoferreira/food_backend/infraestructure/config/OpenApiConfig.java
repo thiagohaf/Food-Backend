@@ -1,4 +1,4 @@
-package com.thiagoferreira.food_backend.config;
+package com.thiagoferreira.food_backend.infraestructure.config;
 
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;

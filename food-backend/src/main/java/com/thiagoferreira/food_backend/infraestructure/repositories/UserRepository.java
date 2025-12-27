@@ -1,4 +1,4 @@
-package com.thiagoferreira.food_backend.repositories;
+package com.thiagoferreira.food_backend.infraestructure.repositories;
 
 import com.thiagoferreira.food_backend.domain.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;

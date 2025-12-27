@@ -4,7 +4,7 @@ import com.thiagoferreira.food_backend.domain.enums.ErrorMessages;
 import com.thiagoferreira.food_backend.domain.entities.User;
 import com.thiagoferreira.food_backend.exceptions.DomainValidationException;
 import com.thiagoferreira.food_backend.exceptions.ResourceNotFoundException;
-import com.thiagoferreira.food_backend.repositories.UserRepository;
+import com.thiagoferreira.food_backend.infraestructure.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
