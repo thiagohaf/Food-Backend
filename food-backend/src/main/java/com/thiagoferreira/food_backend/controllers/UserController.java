@@ -1,6 +1,6 @@
 package com.thiagoferreira.food_backend.controllers;
 
-import com.thiagoferreira.food_backend.entities.User;
+import com.thiagoferreira.food_backend.domain.entities.User;
 import com.thiagoferreira.food_backend.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

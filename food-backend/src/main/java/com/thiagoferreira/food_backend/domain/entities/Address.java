@@ -1,4 +1,4 @@
-package com.thiagoferreira.food_backend.entities;
+package com.thiagoferreira.food_backend.domain.entities;
 
 import jakarta.persistence.Embeddable;
 import lombok.Data;

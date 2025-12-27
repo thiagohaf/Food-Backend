@@ -1,7 +1,7 @@
 package com.thiagoferreira.food_backend.services;
 
-import com.thiagoferreira.food_backend.entities.ErrorMessages;
-import com.thiagoferreira.food_backend.entities.User;
+import com.thiagoferreira.food_backend.domain.entities.ErrorMessages;
+import com.thiagoferreira.food_backend.domain.entities.User;
 import com.thiagoferreira.food_backend.exceptions.DomainValidationException;
 import com.thiagoferreira.food_backend.exceptions.ResourceNotFoundException;
 import com.thiagoferreira.food_backend.repositories.UserRepository;
@@ -24,6 +24,7 @@ public class UserService {
         if (repository.existsByEmail(user.getEmail())) {
             new DomainValidationException(ErrorMessages.EMAIL_ALREADY_EXISTS);
         }
+        System.out.println(user);
         return repository.save(user);
     }
 

@@ -1,6 +1,6 @@
 package com.thiagoferreira.food_backend.repositories;
 
-import com.thiagoferreira.food_backend.entities.User;
+import com.thiagoferreira.food_backend.domain.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
