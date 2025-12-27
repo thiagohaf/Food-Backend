@@ -1,5 +1,6 @@
 package com.thiagoferreira.food_backend.domain.entities;
 
+import com.thiagoferreira.food_backend.domain.enums.UserType;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;

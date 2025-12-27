@@ -1,6 +1,6 @@
 package com.thiagoferreira.food_backend.domain.dto;
 
-import com.thiagoferreira.food_backend.domain.entities.UserType;
+import com.thiagoferreira.food_backend.domain.enums.UserType;
 import lombok.Data;
 
 import java.time.LocalDateTime;

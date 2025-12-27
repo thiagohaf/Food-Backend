@@ -1,4 +1,4 @@
-package com.thiagoferreira.food_backend.domain.entities;
+package com.thiagoferreira.food_backend.domain.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

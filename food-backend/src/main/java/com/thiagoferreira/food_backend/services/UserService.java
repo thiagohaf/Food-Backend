@@ -1,6 +1,6 @@
 package com.thiagoferreira.food_backend.services;
 
-import com.thiagoferreira.food_backend.domain.entities.ErrorMessages;
+import com.thiagoferreira.food_backend.domain.enums.ErrorMessages;
 import com.thiagoferreira.food_backend.domain.entities.User;
 import com.thiagoferreira.food_backend.exceptions.DomainValidationException;
 import com.thiagoferreira.food_backend.exceptions.ResourceNotFoundException;

@@ -1,6 +1,6 @@
 package com.thiagoferreira.food_backend.domain.dto;
 
-import com.thiagoferreira.food_backend.domain.entities.UserType;
+import com.thiagoferreira.food_backend.domain.enums.UserType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
