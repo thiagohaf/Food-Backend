@@ -1,5 +1,6 @@
 package com.thiagoferreira.food_backend.controllers;
 
+import com.thiagoferreira.food_backend.domain.dto.PasswordChangeRequest;
 import com.thiagoferreira.food_backend.domain.dto.UserRequest;
 import com.thiagoferreira.food_backend.domain.dto.UserResponse;
 import com.thiagoferreira.food_backend.domain.entities.User;
@@ -78,10 +79,9 @@ public class UserController {
     @Operation(summary = "Change user password")
     public ResponseEntity<Void> changePassword(
             @PathVariable Long id,
-            @RequestBody @Valid String currentPassword,
-            @RequestBody @Valid String newPassword
+            @RequestBody @Valid PasswordChangeRequest passwordChangeRequest
     ) {
-        userService.changePassword(id, currentPassword, newPassword);
+        userService.changePassword(id, passwordChangeRequest.getCurrentPassword(), passwordChangeRequest.getNewPassword());
         return ResponseEntity
                 .noContent()
                 .build();
