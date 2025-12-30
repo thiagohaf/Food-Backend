@@ -1,31 +1,83 @@
 package com.thiagoferreira.food_backend.mappers;
 
+import com.thiagoferreira.food_backend.domain.dto.AddressDTO;
 import com.thiagoferreira.food_backend.domain.dto.UserRequest;
 import com.thiagoferreira.food_backend.domain.dto.UserResponse;
 import com.thiagoferreira.food_backend.domain.dto.UserUpdateRequest;
+import com.thiagoferreira.food_backend.domain.entities.Address;
 import com.thiagoferreira.food_backend.domain.entities.User;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface UserMapper {
+@Component
+public class UserMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "lastUpdated", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    User toEntity(UserRequest dto);
+    public User toEntity(UserRequest dto) {
+        if (dto == null) {
+            return null;
+        }
 
-    UserResponse toResponse(User entity);
+        User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setLogin(dto.getLogin());
+        user.setPassword(dto.getPassword());
+        user.setType(dto.getType());
+        user.setAddress(toAddressEntity(dto.getAddress()));
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "email", ignore = true)
-    @Mapping(target = "login", ignore = true)
-    @Mapping(target = "password", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "lastUpdated", ignore = true)
-    void updateEntityFromDto(UserUpdateRequest dto, @MappingTarget User entity);
+        return user;
+    }
 
+    public UserResponse toResponse(User entity) {
+        if (entity == null) {
+            return null;
+        }
 
-    // preciso mudar onde utiliza a model para utilizar a DTO e fazer os mappers correspondentes, preciso verificar se os tratamentos de erro estao corretos
+        UserResponse response = new UserResponse();
+        response.setId(entity.getId());
+        response.setName(entity.getName());
+        response.setEmail(entity.getEmail());
+        response.setLogin(entity.getLogin());
+        response.setType(entity.getType());
+        response.setAddress(toAddressDTO(entity.getAddress()));
+        response.setLastUpdate(entity.getLastUpdated());
+
+        return response;
+    }
+
+    public void updateEntityFromDto(UserUpdateRequest dto, User entity) {
+        if (dto == null || entity == null) {
+            return;
+        }
+
+        entity.setName(dto.getName());
+        entity.setAddress(toAddressEntity(dto.getAddress()));
+    }
+
+    private Address toAddressEntity(AddressDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Address address = new Address();
+        address.setStreet(dto.getStreet());
+        address.setNumber(dto.getNumber());
+        address.setCity(dto.getCity());
+        address.setZipCode(dto.getZipCode());
+
+        return address;
+    }
+
+    private AddressDTO toAddressDTO(Address entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        AddressDTO dto = new AddressDTO();
+        dto.setStreet(entity.getStreet());
+        dto.setNumber(entity.getNumber());
+        dto.setCity(entity.getCity());
+        dto.setZipCode(entity.getZipCode());
+
+        return dto;
+    }
 }

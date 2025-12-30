@@ -28,6 +28,10 @@ public class UserService {
         return repository.save(user);
     }
 
+    public List<User> findUsers() {
+        return repository.findAll();
+    }
+
     public User findById(Long id) {
         return repository.findById(id)
                 .orElseThrow( () -> new ResourceNotFoundException((ErrorMessages.USER_NOT_FOUND_BY_ID)));

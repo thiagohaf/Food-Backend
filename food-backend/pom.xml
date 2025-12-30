@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<skip.swagger.codegen>true</skip.swagger.codegen>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -71,11 +72,6 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct</artifactId>
-			<version>1.5.5.Final</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -110,17 +106,14 @@
 				<configuration>
 					<annotationProcessorPaths>
 						<path>
-							<groupId>org.springframework.boot</groupId>
-							<artifactId>spring-boot-configuration-processor</artifactId>
-						</path>
-						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
 						</path>
 						<path>
-							<groupId>org.mapstruct</groupId>
-							<artifactId>mapstruct-processor</artifactId>
-							<version>1.5.5.Final</version>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-configuration-processor</artifactId>
+							<version>4.0.1</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
@@ -182,6 +175,7 @@
 						<configuration>
 							<sources>
 								<source>${project.build.directory}/generated-sources/swagger/src/main/java/</source>
+								<source>${project.build.directory}/generated-sources/annotations/</source>
 							</sources>
 						</configuration>
 					</execution>

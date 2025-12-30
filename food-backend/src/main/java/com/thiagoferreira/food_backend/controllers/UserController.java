@@ -1,6 +1,9 @@
 package com.thiagoferreira.food_backend.controllers;
 
+import com.thiagoferreira.food_backend.domain.dto.UserRequest;
+import com.thiagoferreira.food_backend.domain.dto.UserResponse;
 import com.thiagoferreira.food_backend.domain.entities.User;
+import com.thiagoferreira.food_backend.mappers.UserMapper;
 import com.thiagoferreira.food_backend.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,7 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -19,19 +25,35 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @PostMapping
     @Operation(summary = "Create a new user")
-    public ResponseEntity<User> create(
-            @RequestBody @Valid User dto
+    public ResponseEntity<UserResponse> create(
+            @RequestBody @Valid UserRequest userRequest
     ) {
-        User created = userService.createUser(dto);
+        User user = userService.createUser(userMapper.toEntity(userRequest));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(created);
+                .body(userMapper.toResponse(user));
     }
 
     @GetMapping
+    @Operation(summary = "Search users")
+    public ResponseEntity<List<UserResponse>> findUsers() {
+        List<User> users = userService.findUsers();
+        List<UserResponse> response = Optional.ofNullable(users)
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(Objects::nonNull)
+                .map(userMapper::toResponse)
+                .toList();
+
+        return ResponseEntity
+                .ok(response);
+    }
+
+    @GetMapping("/search")
     @Operation(summary = "Search users by name")
     public ResponseEntity<List<User>> searchByName(
             @RequestParam String name
