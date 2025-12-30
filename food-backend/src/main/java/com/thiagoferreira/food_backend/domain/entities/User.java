@@ -1,6 +1,7 @@
 package com.thiagoferreira.food_backend.domain.entities;
 
 import com.thiagoferreira.food_backend.domain.enums.UserType;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Table(name = "tb_users")
 @Data
 @EntityListeners(AuditingEntityListener.class)
+@Hidden
 public class User {
 
     @Id

@@ -3,6 +3,7 @@ package com.thiagoferreira.food_backend.controllers;
 import com.thiagoferreira.food_backend.domain.dto.PasswordChangeRequest;
 import com.thiagoferreira.food_backend.domain.dto.UserRequest;
 import com.thiagoferreira.food_backend.domain.dto.UserResponse;
+import com.thiagoferreira.food_backend.domain.dto.UserUpdateRequest;
 import com.thiagoferreira.food_backend.domain.entities.User;
 import com.thiagoferreira.food_backend.mappers.UserMapper;
 import com.thiagoferreira.food_backend.services.UserService;
@@ -20,7 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/v1/users")
 @RequiredArgsConstructor
 @Tag(name = "Users", description = "User management APIs")
 public class UserController {
@@ -56,23 +57,31 @@ public class UserController {
 
     @GetMapping("/search")
     @Operation(summary = "Search users by name")
-    public ResponseEntity<List<User>> searchByName(
+    public ResponseEntity<List<UserResponse>> searchByName(
             @RequestParam String name
     ) {
         List<User> users = userService.searchByName(name);
+        List<UserResponse> response = Optional.ofNullable(users)
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(Objects::nonNull)
+                .map(userMapper::toResponse)
+                .toList();
         return ResponseEntity
-                .ok(users.stream().toList());
+                .ok(response);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update user info (except password)")
-    public ResponseEntity<User> updateInfo(
+    public ResponseEntity<UserResponse> updateInfo(
             @PathVariable Long id,
-            @RequestBody @Valid User dto
+            @RequestBody @Valid UserUpdateRequest userUpdateRequest
     ) {
-        User updated = userService.updateUser(id, dto);
+        User user = userService.findById(id);
+        userMapper.updateEntityFromDto(userUpdateRequest, user);
+        User updated = userService.updateUser(id, user);
         return ResponseEntity
-                .ok(updated);
+                .ok(userMapper.toResponse(updated));
     }
 
     @PatchMapping("/{id}/password")
