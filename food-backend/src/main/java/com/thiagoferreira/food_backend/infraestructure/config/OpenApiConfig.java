@@ -37,7 +37,6 @@ public class OpenApiConfig {
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("v1")
-                .pathsToMatch("/v1/**")
                 .packagesToScan("com.thiagoferreira.food_backend.controllers")
                 .build();
     }
