@@ -1,13 +1,20 @@
 package com.thiagoferreira.food_backend.controllers;
 
 import com.thiagoferreira.food_backend.domain.dto.PasswordChangeRequest;
+import com.thiagoferreira.food_backend.domain.dto.ProblemDetailDTO;
 import com.thiagoferreira.food_backend.domain.dto.UserRequest;
 import com.thiagoferreira.food_backend.domain.dto.UserResponse;
 import com.thiagoferreira.food_backend.domain.dto.UserUpdateRequest;
 import com.thiagoferreira.food_backend.domain.entities.User;
+import com.thiagoferreira.food_backend.domain.enums.ErrorMessages;
+import com.thiagoferreira.food_backend.exceptions.ResourceNotFoundException;
 import com.thiagoferreira.food_backend.mappers.UserMapper;
 import com.thiagoferreira.food_backend.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +38,15 @@ public class UserController {
 
     @PostMapping
     @Operation(summary = "Create a new user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error or domain validation error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "415", description = "Unsupported media type",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
+    })
     public ResponseEntity<UserResponse> create(
             @RequestBody @Valid UserRequest userRequest
     ) {
@@ -42,6 +58,11 @@ public class UserController {
 
     @GetMapping
     @Operation(summary = "Search users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Users found successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
+    })
     public ResponseEntity<List<UserResponse>> findUsers() {
         List<User> users = userService.findUsers();
         List<UserResponse> response = Optional.ofNullable(users)
@@ -55,8 +76,15 @@ public class UserController {
                 .ok(response);
     }
 
-    @GetMapping("/search")
+    @GetMapping("/search/name")
     @Operation(summary = "Search users by name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Users found successfully"),
+            @ApiResponse(responseCode = "400", description = "Missing required parameter",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
+    })
     public ResponseEntity<List<UserResponse>> searchByName(
             @RequestParam String name
     ) {
@@ -71,8 +99,77 @@ public class UserController {
                 .ok(response);
     }
 
+    @GetMapping("/search/login")
+    @Operation(summary = "Search users by login")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found successfully"),
+            @ApiResponse(responseCode = "400", description = "Missing required parameter",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
+    })
+    public ResponseEntity<UserResponse> searchByLogin(
+            @RequestParam String login
+    ) {
+        User user = userService.findByLogin(login)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+        return ResponseEntity.ok(userMapper.toResponse(user));
+    }
+
+    @GetMapping("/search/email")
+    @Operation(summary = "Search users by email")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found successfully"),
+            @ApiResponse(responseCode = "400", description = "Missing required parameter",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
+    })
+    public ResponseEntity<UserResponse> searchByEmail(
+            @RequestParam String email
+    ) {
+        User user = userService.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+        return ResponseEntity.ok(userMapper.toResponse(user));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Search users by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid ID format",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
+    })
+    public ResponseEntity<UserResponse> searchById(
+            @PathVariable Long id
+    ) {
+        User user = userService.findById(id);
+        UserResponse response = userMapper.toResponse(user);
+        return ResponseEntity
+                .ok(response);
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Update user info (except password)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error or invalid ID format",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "415", description = "Unsupported media type",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
+    })
     public ResponseEntity<UserResponse> updateInfo(
             @PathVariable Long id,
             @RequestBody @Valid UserUpdateRequest userUpdateRequest
@@ -86,6 +183,17 @@ public class UserController {
 
     @PatchMapping("/{id}/password")
     @Operation(summary = "Change user password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error, domain validation error or invalid ID format",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "415", description = "Unsupported media type",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
+    })
     public ResponseEntity<Void> changePassword(
             @PathVariable Long id,
             @RequestBody @Valid PasswordChangeRequest passwordChangeRequest
@@ -98,6 +206,15 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "User deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid ID format",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
+    })
     public ResponseEntity<Void> delete(
             @PathVariable Long id
     ) {
