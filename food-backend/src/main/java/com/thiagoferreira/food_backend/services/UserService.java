@@ -46,7 +46,7 @@ public class UserService {
     }
 
     public List<User> searchByName(String name) {
-        return repository.findByName(name);
+        return repository.findByNameContainingIgnoreCaseOrderByNameAsc(name);
     }
 
     @Transactional
