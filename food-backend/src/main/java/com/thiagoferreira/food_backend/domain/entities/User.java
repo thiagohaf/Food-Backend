@@ -39,9 +39,11 @@ public class User {
     @Embedded
     private Address address;
 
-    @LastModifiedDate
-    private LocalDateTime lastUpdated;
-
+    @Column(name = "created_at", updatable = false)
     @CreatedDate
     private LocalDateTime createdAt;
+
+    @Column(name = "last_updated")
+    @LastModifiedDate
+    private LocalDateTime lastUpdated;
 }
