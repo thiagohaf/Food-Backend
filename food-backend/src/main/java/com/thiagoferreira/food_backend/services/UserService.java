@@ -22,9 +22,11 @@ public class UserService {
     @Transactional
     public User createUser(User user) {
         if (repository.existsByEmail(user.getEmail())) {
-            new DomainValidationException(ErrorMessages.EMAIL_ALREADY_EXISTS);
+            throw new DomainValidationException(ErrorMessages.EMAIL_ALREADY_EXISTS);
         }
-        System.out.println(user);
+        if (repository.existsByLogin(user.getLogin())) {
+            throw new DomainValidationException(ErrorMessages.LOGIN_ALREADY_EXISTS);
+        }
         return repository.save(user);
     }
 

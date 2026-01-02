@@ -11,6 +11,7 @@ public enum ErrorMessages {
     USER_NOT_FOUND("User not found with the provided details."),
     USER_NOT_FOUND_BY_ID("User not found with ID: %s"),
     EMAIL_ALREADY_EXISTS("The email provided is already registered."),
+    LOGIN_ALREADY_EXISTS("The login provided is already registered."),
     LOGIN_INVALID("Invalid credentials. Please check your login and password."),
     PASSWORD_MISMATCH("The current password provided is incorrect."),
 
