@@ -2,7 +2,11 @@
 
 Este documento contém todos os cenários de teste para validar a implementação do tratamento de erros com ProblemDetail (RFC 7807) via Postman.
 
-**Base URL:** `http://localhost:8080`
+**Base URL:** 
+- Execução local: `http://localhost:8080`
+- Docker Compose: `http://localhost:8081`
+
+**Nota:** Se você estiver usando Docker Compose, substitua `8080` por `8081` em todas as URLs deste guia.
 
 ## 📑 Índice
 
@@ -15,6 +19,29 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 6. [Checklist de Testes](#-6-checklist-de-testes)
 7. [Configuração no Postman](#-configuração-no-postman)
 8. [Notas Importantes](#-notas-importantes)
+
+---
+
+## 🚀 Início Rápido
+
+### Pré-requisitos
+- Aplicação em execução (local ou Docker)
+- Postman instalado
+- Collection importada: `Food_Backend_ProblemDetail_Tests.postman_collection.json`
+
+### Configuração Inicial
+
+1. **Importe a Collection**: Abra o Postman e importe o arquivo `Food_Backend_ProblemDetail_Tests.postman_collection.json`
+
+2. **Configure a Base URL**: 
+   - Se executando localmente (Maven): `http://localhost:8080`
+   - Se executando com Docker Compose: `http://localhost:8081`
+   - Ajuste a variável `base_url` na collection
+
+3. **Primeiro Teste**: 
+   - Execute "POST - Criar usuário válido (público)" da seção "5. Casos de Sucesso"
+   - Depois execute "POST - Login (sucesso)" da seção "0. Autenticação"
+   - Agora você pode testar os endpoints protegidos
 
 ---
 
@@ -625,7 +652,7 @@ Status: 200 OK
 
 ### 4.1. HttpMessageNotReadableException (400) - JSON malformado
 **Método:** `POST`  
-**URL:** `http://localhost:8080/v1/users`  
+**URL:** `http://localhost:8080/v1/users` (ou `http://localhost:8081` se usar Docker Compose)  
 **Headers:** `Content-Type: application/json`  
 **Body:**
 ```json
@@ -1184,16 +1211,21 @@ Use esta checklist para garantir que testou todos os cenários:
 
 ## 🔧 Configuração no Postman
 
-### Criar Collection
-1. Crie uma nova Collection chamada "Food Backend - ProblemDetail Tests"
-2. Configure a variável de ambiente:
+### Importar Collection
+1. Importe a coleção do arquivo `Food_Backend_ProblemDetail_Tests.postman_collection.json`
+2. Ou crie uma nova Collection chamada "Food Backend - ProblemDetail Tests"
+3. Configure a variável de ambiente:
    - Variable: `base_url`
-   - Value: `http://localhost:8080`
+   - Value: `http://localhost:8080` (ou `http://localhost:8081` se usar Docker Compose)
 
 ### Variáveis de Ambiente
 Recomenda-se criar variáveis para facilitar os testes:
-- `base_url`: `http://localhost:8080`
+- `base_url`: 
+  - `http://localhost:8080` (execução local)
+  - `http://localhost:8081` (Docker Compose)
 - `user_id`: (será preenchido após criar um usuário)
+
+**Dica:** A coleção já vem pré-configurada com a variável `base_url`. Basta ajustar o valor conforme sua forma de execução.
 
 ### Headers Padrão
 Configure estes headers para todas as requisições que precisam de body:
@@ -1204,13 +1236,18 @@ Configure estes headers para todas as requisições que precisam de body:
 
 ## 📝 Notas Importantes
 
-1. **Ordem dos Testes**: Recomenda-se criar um usuário primeiro (teste de sucesso) para depois testar os casos de erro relacionados (email duplicado, atualização, etc.)
+1. **Porta da Aplicação**: 
+   - Execução local (Maven): `http://localhost:8080`
+   - Docker Compose: `http://localhost:8081`
+   - Ajuste a variável `base_url` na collection conforme sua forma de execução
 
-2. **IDs Dinâmicos**: Após criar um usuário, use o ID retornado nos testes subsequentes
+2. **Ordem dos Testes**: Recomenda-se criar um usuário primeiro (teste de sucesso) para depois testar os casos de erro relacionados (email duplicado, atualização, etc.)
 
-3. **Limpeza**: Para testar "email duplicado", você precisará criar um usuário primeiro. Depois, tente criar outro com o mesmo email
+3. **IDs Dinâmicos**: Após criar um usuário, use o ID retornado nos testes subsequentes. Você pode configurar a variável `user_id` na collection para facilitar
 
-4. **Status Codes**: Verifique sempre o status code HTTP na resposta:
+4. **Limpeza**: Para testar "email duplicado", você precisará criar um usuário primeiro. Depois, tente criar outro com o mesmo email
+
+5. **Status Codes**: Verifique sempre o status code HTTP na resposta:
    - 400: Bad Request (validação, erro de domínio, JSON malformado, parâmetro faltando, tipo incorreto)
    - 401: Unauthorized (acesso não autorizado - sessão inválida ou ausente) - retorna ProblemDetail
    - 404: Not Found (recurso não encontrado, endpoint não encontrado)
@@ -1234,4 +1271,14 @@ Configure estes headers para todas as requisições que precisam de body:
    - `status`: Código HTTP
    - `detail`: Mensagem detalhada do erro
    - `properties`: Propriedades adicionais (quando aplicável)
+
+7. **Versão da API**: 
+   - Spring Boot: 4.0.1
+   - Java: 21
+   - SpringDoc OpenAPI: 2.7.0
+   - Esta collection foi testada com a versão 0.0.1-SNAPSHOT
+
+8. **Documentação Adicional**: 
+   - Swagger UI: `http://localhost:8080/swagger-ui.html` (ou `http://localhost:8081` no Docker)
+   - OpenAPI JSON: `http://localhost:8080/api-docs` (ou `http://localhost:8081/api-docs` no Docker)
 

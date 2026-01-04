@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "food-backend-problemdetail-tests",
 		"name": "Food Backend - ProblemDetail Tests",
-		"description": "Collection para testar todos os cenários de erro com ProblemDetail (RFC 7807)",
+		"description": "Collection para testar todos os cenários de erro com ProblemDetail (RFC 7807).\n\n**Configuração:**\n- Base URL local: http://localhost:8080\n- Base URL Docker: http://localhost:8081\n\nAjuste a variável 'base_url' conforme sua forma de execução.\n\n**Ordem recomendada:**\n1. Criar usuário (POST /v1/users)\n2. Fazer login (POST /auth/login)\n3. Testar endpoints protegidos",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -546,7 +546,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao@email.com\",\n  \"login\": \"joaosilva\",\n  \"password\": \"senha123\",\n  \"type\": \"CUSTOMER\"\n  \"address\": {}"
+							"raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao@email.com\",\n  \"login\": \"joaosilva\",\n  \"password\": \"senha123\",\n  \"type\": \"CUSTOMER\"\n  \"address\": {}\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/v1/users",
