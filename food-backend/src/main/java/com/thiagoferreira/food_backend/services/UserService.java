@@ -78,11 +78,12 @@ public class UserService {
     public void changePassword(Long id, String currentPassword, String newPassword) {
         User user = findById(id);
 
-        if (currentPassword.matches(newPassword)) {
+        if (!BCrypt.checkpw(currentPassword, user.getPassword())) {
             throw new DomainValidationException(ErrorMessages.PASSWORD_MISMATCH);
         }
 
-        user.setPassword(newPassword);
+        String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+        user.setPassword(hashedPassword);
         user.setLastUpdated(LocalDateTime.now());
         repository.save(user);
     }
