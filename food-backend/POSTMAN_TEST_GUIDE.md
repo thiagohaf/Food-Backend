@@ -200,7 +200,7 @@ Status: 200 OK
   "type": "https://api.food-backend.com/problems/resource-not-found",
   "title": "Resource Not Found",
   "status": 404,
-  "detail": "User not found with ID: %s"
+  "detail": "User not found with ID: 99999"
 }
 ```
 
@@ -229,7 +229,7 @@ Status: 200 OK
   "type": "https://api.food-backend.com/problems/resource-not-found",
   "title": "Resource Not Found",
   "status": 404,
-  "detail": "User not found with ID: %s"
+  "detail": "User not found with ID: 99999"
 }
 ```
 
@@ -301,7 +301,7 @@ Status: 200 OK
   "type": "https://api.food-backend.com/problems/resource-not-found",
   "title": "Resource Not Found",
   "status": 404,
-  "detail": "User not found with ID: %s"
+  "detail": "User not found with ID: 99999"
 }
 ```
 

@@ -6,4 +6,8 @@ public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(ErrorMessages errorMessages) {
         super(errorMessages.getMessage());
     }
+    
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
 }

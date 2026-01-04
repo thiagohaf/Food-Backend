@@ -39,7 +39,7 @@ public class UserService {
 
     public User findById(Long id) {
         return repository.findById(id)
-                .orElseThrow( () -> new ResourceNotFoundException((ErrorMessages.USER_NOT_FOUND_BY_ID)));
+                .orElseThrow( () -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND_BY_ID.params(id)));
     }
 
     public Optional<User> findByLogin(String login) {
