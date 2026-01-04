@@ -20,16 +20,20 @@ API RESTful desenvolvida em Spring Boot para gerenciamento de usuários do siste
 
 ### Validação e Documentação
 - **Bean Validation** - Validação de entradas
-- **SpringDoc OpenAPI 3** - Documentação da API (Swagger)
-- **Swagger Annotations** - Anotações para documentação
+- **SpringDoc OpenAPI 3 (v2.7.0)** - Documentação da API (Swagger)
+- **Swagger Annotations (v2.2.22)** - Anotações para documentação
 
 ### Segurança
-- **jBCrypt** - Biblioteca para hashing de senhas (BCrypt)
+- **jBCrypt (v0.4)** - Biblioteca para hashing de senhas (BCrypt)
 - **HttpSession** - Autenticação stateful baseada em sessão
 
 ### Utilitários
 - **Lombok** - Redução de boilerplate
-- **Spring Boot DevTools** - Ferramentas de desenvolvimento
+
+### Testes e Qualidade
+- **JUnit 5** - Framework de testes (via Spring Boot Starter Test)
+- **JaCoCo (v0.8.11)** - Análise de cobertura de código (mínimo 80%)
+- **Maven Surefire Plugin** - Execução de testes
 
 ### Containerização
 - **Docker** - Containerização da aplicação
@@ -92,9 +96,11 @@ food-backend/
 Antes de começar, certifique-se de ter instalado:
 
 - **Java 21** ou superior
-- **Maven 3.9** ou superior
+- **Maven 3.9** ou superior (opcional - o projeto inclui Maven Wrapper)
 - **PostgreSQL 16** ou superior (ou Docker)
 - **Docker** e **Docker Compose** (opcional, para execução via containers)
+
+**Nota**: O projeto inclui Maven Wrapper (`mvnw` e `mvnw.cmd`), então você não precisa ter Maven instalado localmente se preferir usar o wrapper.
 
 ## ⚙️ Configuração
 
@@ -356,15 +362,47 @@ O projeto segue uma arquitetura em camadas:
 
 ## 🧪 Testes
 
+### Executando Testes
+
 Para executar os testes:
 
 ```bash
 ./mvnw test
 ```
 
+Ou usando Maven instalado localmente:
+```bash
+mvn test
+```
+
+### Cobertura de Código
+
+O projeto utiliza **JaCoCo** para análise de cobertura de código:
+
+- **Cobertura mínima exigida**: 80% de linhas
+- **Relatório gerado**: `target/site/jacoco/index.html`
+
+Para visualizar o relatório de cobertura após executar os testes:
+
+```bash
+# Os relatórios são gerados automaticamente após mvn test
+# Acesse: target/site/jacoco/index.html
+```
+
+Para executar os testes e verificar a cobertura:
+
+```bash
+./mvnw clean test
+```
+
+### Tipos de Testes
+
 O projeto inclui:
-- Testes unitários
-- Testes de integração (via Spring Boot Test)
+- **Testes unitários** - Testes isolados de componentes individuais
+- **Testes de integração** - Testes via Spring Boot Test com contexto completo
+- **Testes de controladores** - Testes de endpoints REST
+- **Testes de serviços** - Testes de lógica de negócio
+- **Testes de exceções** - Testes de tratamento de erros
 
 ### Testes com Postman
 
@@ -378,23 +416,41 @@ Consulte o arquivo `POSTMAN_TEST_GUIDE.md` para mais detalhes sobre como usar a 
 ### Dockerfile
 
 A aplicação possui um `Dockerfile` multi-stage que:
-1. Usa Maven para compilar a aplicação
-2. Cria uma imagem final com JRE apenas
-3. Expõe a porta 8081
+1. **Stage 1 (Build)**: Usa Maven 3.9 com Eclipse Temurin 21 para compilar a aplicação
+2. **Stage 2 (Runtime)**: Cria uma imagem final com Eclipse Temurin 21 JRE apenas
+3. Expõe a porta 8080 internamente (mapeada para 8081 no host via Docker Compose)
+4. Executa o JAR gerado automaticamente
 
 ### Docker Compose
 
-O `docker-compose.yml` inclui:
-- **PostgreSQL 16** - Banco de dados
-- **App** - Aplicação Spring Boot
+O `docker-compose.yml` inclui dois serviços:
+
+#### Serviço PostgreSQL
+- **Imagem**: `postgres:16-alpine`
+- **Container**: `food-postgres`
+- **Porta**: `5432:5432`
+- **Banco de dados**: `food_db`
+- **Usuário**: `postgres`
+- **Senha**: `postgres`
+- **Volume persistente**: `postgres_data`
+- **Health check**: Verifica se o PostgreSQL está pronto
+
+#### Serviço App
+- **Build**: Usa o Dockerfile local
+- **Container**: `food-app`
+- **Porta**: `8081:8080` (host:container)
+- **Dependências**: Aguarda o PostgreSQL estar saudável
+- **Variáveis de ambiente**: Configuradas automaticamente
 
 O Docker Compose configura automaticamente:
-- Banco de dados PostgreSQL
-- Health checks
-- Volumes persistentes
-- Rede entre containers
+- **Health checks** - Verifica saúde dos serviços
+- **Volumes persistentes** - Dados do PostgreSQL são mantidos
+- **Rede interna** - Comunicação entre containers
+- **Dependências** - App aguarda PostgreSQL estar pronto
 
 ## 📦 Build
+
+### Build Local
 
 Para construir o projeto sem executar testes:
 
@@ -402,26 +458,52 @@ Para construir o projeto sem executar testes:
 ./mvnw clean package -DskipTests
 ```
 
+Para construir o projeto com testes:
+
+```bash
+./mvnw clean package
+```
+
+### Build Docker
+
 Para construir a imagem Docker:
 
 ```bash
+cd food-backend
 docker build -t food-backend:latest .
 ```
+
+### Build Multi-Stage
+
+O Dockerfile utiliza build multi-stage:
+- **Build stage**: Compila o projeto usando Maven
+- **Runtime stage**: Imagem final otimizada com apenas JRE
 
 ## 🔧 Configurações Adicionais
 
 ### JPA/Hibernate
 
-- DDL Auto: `update` (atualiza schema automaticamente)
-- Show SQL: `false` (pode ser habilitado para debug)
-- Dialect: PostgreSQL
+- **DDL Auto**: `update` (atualiza schema automaticamente)
+- **Show SQL**: `false` (pode ser habilitado para debug)
+- **Format SQL**: `true` (SQL formatado quando exibido)
+- **Open-in-View**: `false` (melhor prática para evitar problemas de performance)
+- **Dialect**: PostgreSQL
 
 ### Swagger/OpenAPI
 
-- Path da documentação: `/api-docs`
-- Path do Swagger UI: `/swagger-ui.html`
-- Ordenação: Por método HTTP
-- Tags ordenadas alfabeticamente
+- **Versão**: SpringDoc OpenAPI 2.7.0
+- **Path da documentação**: `/api-docs`
+- **Path do Swagger UI**: `/swagger-ui.html`
+- **Ordenação**: Por método HTTP
+- **Tags**: Ordenadas alfabeticamente
+- **Swagger Annotations**: v2.2.22
+
+### Cobertura de Código (JaCoCo)
+
+- **Plugin**: JaCoCo Maven Plugin v0.8.11
+- **Cobertura mínima**: 80% de linhas
+- **Relatórios**: Gerados em `target/site/jacoco/`
+- **Verificação**: Executada automaticamente durante `mvn test`
 
 ## 📝 Validações Implementadas
 
@@ -465,6 +547,12 @@ Para questões ou suporte, consulte:
 - **Versão atual**: 0.0.1-SNAPSHOT
 - **Spring Boot**: 4.0.1
 - **Java**: 21
+- **Maven**: 3.9+
+- **PostgreSQL**: 16
+- **SpringDoc OpenAPI**: 2.7.0
+- **Swagger Annotations**: 2.2.22
+- **JaCoCo**: 0.8.11
+- **jBCrypt**: 0.4
 
 ---
 
