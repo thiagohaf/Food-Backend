@@ -23,6 +23,10 @@ API RESTful desenvolvida em Spring Boot para gerenciamento de usuários do siste
 - **SpringDoc OpenAPI 3** - Documentação da API (Swagger)
 - **Swagger Annotations** - Anotações para documentação
 
+### Segurança
+- **jBCrypt** - Biblioteca para hashing de senhas (BCrypt)
+- **HttpSession** - Autenticação stateful baseada em sessão
+
 ### Utilitários
 - **Lombok** - Redução de boilerplate
 - **Spring Boot DevTools** - Ferramentas de desenvolvimento
@@ -40,10 +44,14 @@ food-backend/
 │   │   ├── java/com/thiagoferreira/food_backend/
 │   │   │   ├── Application.java                    # Classe principal
 │   │   │   ├── controllers/                        # Controladores REST
+│   │   │   │   ├── AuthController.java
 │   │   │   │   └── UserController.java
+│   │   │   ├── interceptors/                       # Interceptadores HTTP
+│   │   │   │   └── AuthInterceptor.java
 │   │   │   ├── domain/
 │   │   │   │   ├── dto/                           # Data Transfer Objects
 │   │   │   │   │   ├── AddressDTO.java
+│   │   │   │   │   ├── LoginRequest.java
 │   │   │   │   │   ├── PasswordChangeRequest.java
 │   │   │   │   │   ├── ProblemDetailDTO.java
 │   │   │   │   │   ├── UserRequest.java
@@ -58,10 +66,12 @@ food-backend/
 │   │   │   ├── exceptions/                        # Tratamento de exceções
 │   │   │   │   ├── DomainValidationException.java
 │   │   │   │   ├── GlobalExceptionHandler.java
-│   │   │   │   └── ResourceNotFoundException.java
+│   │   │   │   ├── ResourceNotFoundException.java
+│   │   │   │   └── UnauthorizedException.java
 │   │   │   ├── infraestructure/
 │   │   │   │   ├── config/                        # Configurações
-│   │   │   │   │   └── OpenApiConfig.java
+│   │   │   │   │   ├── OpenApiConfig.java
+│   │   │   │   │   └── WebConfig.java
 │   │   │   │   └── repositories/                  # Repositórios JPA
 │   │   │   │       └── UserRepository.java
 │   │   │   ├── mappers/                           # Mappers DTO/Entity
@@ -163,19 +173,36 @@ A documentação completa da API está disponível através do **Swagger UI** qu
 
 ### Endpoints Principais
 
+#### Autenticação (`/auth`)
+
+| Método | Endpoint | Descrição | Autenticação |
+|--------|----------|-----------|--------------|
+| POST | `/auth/login` | Autenticar usuário e criar sessão | Não requerida |
+| POST | `/auth/logout` | Encerrar sessão do usuário | Requerida |
+
+**Login Request:**
+```json
+{
+  "login": "usuario123",
+  "password": "senha123"
+}
+```
+
+**Nota:** Após o login bem-sucedido, uma sessão HTTP é criada e o ID do usuário é armazenado na sessão. Esta sessão deve ser mantida pelo cliente (cookies) para acessar endpoints protegidos.
+
 #### Usuários (`/v1/users`)
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/v1/users` | Criar novo usuário |
-| GET | `/v1/users` | Listar todos os usuários |
-| GET | `/v1/users/{id}` | Buscar usuário por ID |
-| GET | `/v1/users/search/name?name={nome}` | Buscar usuários por nome |
-| GET | `/v1/users/search/login?login={login}` | Buscar usuário por login |
-| GET | `/v1/users/search/email?email={email}` | Buscar usuário por email |
-| PUT | `/v1/users/{id}` | Atualizar informações do usuário |
-| PATCH | `/v1/users/{id}/password` | Alterar senha do usuário |
-| DELETE | `/v1/users/{id}` | Deletar usuário |
+| Método | Endpoint | Descrição | Autenticação |
+|--------|----------|-----------|--------------|
+| POST | `/v1/users` | Criar novo usuário | Não requerida (público) |
+| GET | `/v1/users` | Listar todos os usuários | Requerida |
+| GET | `/v1/users/{id}` | Buscar usuário por ID | Requerida |
+| GET | `/v1/users/search/name?name={nome}` | Buscar usuários por nome | Requerida |
+| GET | `/v1/users/search/login?login={login}` | Buscar usuário por login | Requerida |
+| GET | `/v1/users/search/email?email={email}` | Buscar usuário por email | Requerida |
+| PUT | `/v1/users/{id}` | Atualizar informações do usuário | Requerida |
+| PATCH | `/v1/users/{id}/password` | Alterar senha do usuário | Requerida |
+| DELETE | `/v1/users/{id}` | Deletar usuário | Requerida |
 
 ### Modelo de Dados
 
@@ -200,6 +227,75 @@ A documentação completa da API está disponível através do **Swagger UI** qu
 - `OWNER` - Proprietário
 - `CUSTOMER` - Cliente
 
+## 🔐 Autenticação e Segurança
+
+A aplicação implementa autenticação **stateful** baseada em **HttpSession**, sem utilizar Spring Security. A proteção dos endpoints é feita manualmente através de um `HandlerInterceptor`.
+
+### Como Funciona
+
+1. **Login**: O usuário faz uma requisição `POST /auth/login` com login e senha
+2. **Validação**: O sistema busca o usuário pelo login e verifica a senha usando BCrypt
+3. **Sessão**: Se válido, uma sessão HTTP é criada com o atributo `USER_ID`
+4. **Acesso**: Endpoints protegidos verificam a existência da sessão válida
+5. **Logout**: O usuário pode encerrar a sessão através de `POST /auth/logout`
+
+### Endpoints Públicos
+
+Os seguintes endpoints **não requerem** autenticação:
+- `POST /auth/login` - Login de usuário
+- `POST /v1/users` - Cadastro de novo usuário (público)
+- `OPTIONS` - Requisições CORS preflight
+
+### Endpoints Protegidos
+
+Todos os demais endpoints requerem autenticação. Se uma requisição for feita sem sessão válida, será retornado **401 Unauthorized** com um objeto ProblemDetail no formato RFC 7807:
+
+```json
+{
+  "type": "https://api.food-backend.com/problems/unauthorized",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Authentication required. Please log in to access this resource."
+}
+```
+
+### Criptografia de Senhas
+
+As senhas são criptografadas usando **BCrypt** antes de serem armazenadas no banco de dados:
+- Hash gerado automaticamente no cadastro (`createUser`)
+- Verificação de senha no login usando `BCrypt.checkpw()`
+- Salt automático gerado para cada senha
+
+### Exemplo de Fluxo
+
+```bash
+# 1. Criar usuário (público)
+POST /v1/users
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "login": "joaosilva",
+  "password": "senha123",
+  "type": "CUSTOMER"
+}
+
+# 2. Fazer login (cria sessão)
+POST /auth/login
+{
+  "login": "joaosilva",
+  "password": "senha123"
+}
+# Resposta: 200 OK (sessão criada automaticamente)
+
+# 3. Acessar endpoints protegidos (sessão é mantida automaticamente)
+GET /v1/users
+# Resposta: 200 OK com lista de usuários
+
+# 4. Logout
+POST /auth/logout
+# Resposta: 200 OK (sessão invalidada)
+```
+
 ## 🔒 Tratamento de Erros
 
 A aplicação utiliza **RFC 7807 (Problem Details)** para padronização de respostas de erro. Todas as exceções são tratadas pelo `GlobalExceptionHandler` e retornam objetos `ProblemDetail` estruturados.
@@ -207,13 +303,15 @@ A aplicação utiliza **RFC 7807 (Problem Details)** para padronização de resp
 ### Tipos de Erros Tratados
 
 - **400 Bad Request**: Validações, violações de domínio, parâmetros inválidos
+- **401 Unauthorized**: Acesso não autorizado (sessão inválida ou ausente)
 - **404 Not Found**: Recurso não encontrado
 - **405 Method Not Allowed**: Método HTTP não suportado
 - **415 Unsupported Media Type**: Tipo de mídia não suportado
 - **500 Internal Server Error**: Erros internos do servidor
 
-### Exemplo de Resposta de Erro
+### Exemplos de Respostas de Erro
 
+**Exemplo 1: Erro de Validação (400)**
 ```json
 {
   "type": "https://api.food-backend.com/problems/validation-error",
@@ -224,6 +322,16 @@ A aplicação utiliza **RFC 7807 (Problem Details)** para padronização de resp
     "email": "Invalid email format",
     "password": "Password must be at least 6 characters"
   }
+}
+```
+
+**Exemplo 2: Acesso Não Autorizado (401)**
+```json
+{
+  "type": "https://api.food-backend.com/problems/unauthorized",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Authentication required. Please log in to access this resource."
 }
 ```
 
@@ -330,6 +438,7 @@ docker build -t food-backend:latest .
 - Login não pode ser duplicado
 - Senha atual e nova senha não podem ser iguais
 - Usuário deve existir para operações de atualização/exclusão
+- Senha deve ser verificada corretamente no login (BCrypt)
 
 ## 🤝 Contribuindo
 

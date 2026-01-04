@@ -7,6 +7,169 @@
 	},
 	"item": [
 		{
+			"name": "0. Autenticação",
+			"item": [
+				{
+					"name": "POST - Login (sucesso)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"joaosilva\",\n  \"password\": \"senha123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Autentica um usuário e cria uma sessão HTTP. PRÉ-REQUISITO: Criar um usuário primeiro com login 'joaosilva' e senha 'senha123'"
+					},
+					"response": []
+				},
+				{
+					"name": "POST - Login (usuário não encontrado)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"usuario_inexistente\",\n  \"password\": \"senha123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Testa login com usuário inexistente - deve retornar 404"
+					},
+					"response": []
+				},
+				{
+					"name": "POST - Login (senha incorreta)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"joaosilva\",\n  \"password\": \"senha_errada\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Testa login com senha incorreta - deve retornar 404"
+					},
+					"response": []
+				},
+				{
+					"name": "POST - Login (validação - login vazio)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"\",\n  \"password\": \"senha123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Testa validação - campo login vazio"
+					},
+					"response": []
+				},
+				{
+					"name": "POST - Login (validação - senha vazia)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"joaosilva\",\n  \"password\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Testa validação - campo senha vazio"
+					},
+					"response": []
+				},
+				{
+					"name": "POST - Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "logout"]
+						},
+						"description": "Encerra a sessão do usuário autenticado. PRÉ-REQUISITO: Fazer login primeiro"
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Acesso não autorizado (sem login)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/users",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "users"]
+						},
+						"description": "Testa acesso a endpoint protegido sem autenticação - deve retornar 401"
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Acesso não autorizado (após logout)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/users",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "users"]
+						},
+						"description": "Testa acesso a endpoint protegido após logout - deve retornar 401. PRÉ-REQUISITO: Fazer login e depois logout"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints e testes relacionados à autenticação"
+		},
+		{
 			"name": "1. ResourceNotFoundException (404)",
 			"item": [
 				{
@@ -615,7 +778,7 @@
 			"name": "5. Casos de Sucesso",
 			"item": [
 				{
-					"name": "POST - Criar usuário válido",
+					"name": "POST - Criar usuário válido (público)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -638,6 +801,29 @@
 					"response": []
 				},
 				{
+					"name": "POST - Login (antes de acessar endpoints protegidos)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"joaosilva\",\n  \"password\": \"senha123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Faz login para criar sessão antes de acessar endpoints protegidos. PRÉ-REQUISITO: Criar usuário primeiro"
+					},
+					"response": []
+				},
+				{
 					"name": "GET - Listar todos os usuários",
 					"request": {
 						"method": "GET",
@@ -647,7 +833,7 @@
 							"host": ["{{base_url}}"],
 							"path": ["v1", "users"]
 						},
-						"description": "Lista todos os usuários cadastrados"
+						"description": "Lista todos os usuários cadastrados. PRÉ-REQUISITO: Fazer login primeiro"
 					},
 					"response": []
 				},
@@ -661,7 +847,7 @@
 							"host": ["{{base_url}}"],
 							"path": ["v1", "users", "{{user_id}}"]
 						},
-						"description": "Busca um usuário específico por ID"
+						"description": "Busca um usuário específico por ID. PRÉ-REQUISITO: Fazer login primeiro"
 					},
 					"response": []
 				},
@@ -682,7 +868,7 @@
 								}
 							]
 						},
-						"description": "Busca usuários por nome (retorna lista)"
+						"description": "Busca usuários por nome (retorna lista). PRÉ-REQUISITO: Fazer login primeiro"
 					},
 					"response": []
 				},
@@ -703,7 +889,7 @@
 								}
 							]
 						},
-						"description": "Busca um usuário específico por login"
+						"description": "Busca um usuário específico por login. PRÉ-REQUISITO: Fazer login primeiro"
 					},
 					"response": []
 				},
@@ -724,7 +910,7 @@
 								}
 							]
 						},
-						"description": "Busca um usuário específico por email"
+						"description": "Busca um usuário específico por email. PRÉ-REQUISITO: Fazer login primeiro"
 					},
 					"response": []
 				},
@@ -747,7 +933,7 @@
 							"host": ["{{base_url}}"],
 							"path": ["v1", "users", "{{user_id}}"]
 						},
-						"description": "Atualiza informações do usuário (exceto senha)"
+						"description": "Atualiza informações do usuário (exceto senha). PRÉ-REQUISITO: Fazer login primeiro"
 					},
 					"response": []
 				},
@@ -770,7 +956,7 @@
 							"host": ["{{base_url}}"],
 							"path": ["v1", "users", "{{user_id}}", "password"]
 						},
-						"description": "Altera a senha do usuário"
+						"description": "Altera a senha do usuário. PRÉ-REQUISITO: Fazer login primeiro"
 					},
 					"response": []
 				},
@@ -784,7 +970,7 @@
 							"host": ["{{base_url}}"],
 							"path": ["v1", "users", "{{user_id}}"]
 						},
-						"description": "Deleta um usuário"
+						"description": "Deleta um usuário. PRÉ-REQUISITO: Fazer login primeiro"
 					},
 					"response": []
 				}

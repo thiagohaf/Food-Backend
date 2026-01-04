@@ -16,7 +16,11 @@ public class OpenApiConfig {
     public OpenAPI springShopOpenAPI() {
         return new OpenAPI()
                 .info(new Info().title("Food API")
-                        .description("API RESTful for Food.")
+                        .description("API RESTful for Food App - Sistema de gestão de restaurantes. " +
+                                "Esta API utiliza autenticação stateful baseada em HttpSession. " +
+                                "Para acessar endpoints protegidos, é necessário fazer login primeiro através do endpoint POST /auth/login. " +
+                                "A sessão é mantida automaticamente através de cookies (JSESSIONID). " +
+                                "O endpoint POST /v1/users (cadastro de usuário) é público e não requer autenticação.")
                         .version("v1.0")
                         .license(new License()
                                 .name("MIT")

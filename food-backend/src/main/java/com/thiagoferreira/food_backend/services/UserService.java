@@ -7,6 +7,7 @@ import com.thiagoferreira.food_backend.exceptions.ResourceNotFoundException;
 import com.thiagoferreira.food_backend.infraestructure.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,6 +28,8 @@ public class UserService {
         if (repository.existsByLogin(user.getLogin())) {
             throw new DomainValidationException(ErrorMessages.LOGIN_ALREADY_EXISTS);
         }
+        String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+        user.setPassword(hashedPassword);
         return repository.save(user);
     }
 
@@ -45,6 +48,17 @@ public class UserService {
 
     public Optional<User> findByEmail(String email) {
         return repository.findByEmail(email);
+    }
+
+    public User authenticate(String login, String password) {
+        User user = repository.findByLogin(login)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND));
+        
+        if (!BCrypt.checkpw(password, user.getPassword())) {
+            throw new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND);
+        }
+        
+        return user;
     }
 
     public List<User> searchByName(String name) {

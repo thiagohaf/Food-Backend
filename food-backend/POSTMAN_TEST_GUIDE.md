@@ -2,10 +2,11 @@
 
 Este documento contém todos os cenários de teste para validar a implementação do tratamento de erros com ProblemDetail (RFC 7807) via Postman.
 
-**Base URL:** `http://localhost:8080/v1/users`
+**Base URL:** `http://localhost:8080`
 
 ## 📑 Índice
 
+0. [Autenticação](#-0-autenticação)
 1. [ResourceNotFoundException (404)](#-1-resourcenotfoundexception-404---not-found)
 2. [DomainValidationException (400)](#-2-domainvalidationexception-400---bad-request)
 3. [MethodArgumentNotValidException (400)](#-3-methodargumentnotvalidexception-400---validation-error)
@@ -17,9 +18,179 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 
 ---
 
+## 🔐 0. Autenticação
+
+A API implementa autenticação stateful baseada em HttpSession. A maioria dos endpoints requer autenticação, exceto:
+- `POST /auth/login` - Login de usuário
+- `POST /v1/users` - Cadastro de novo usuário (público)
+
+**Importante:** Após fazer login, a sessão é mantida automaticamente pelo Postman através de cookies. Para acessar endpoints protegidos, você deve fazer login primeiro.
+
+### 0.1. Login (sucesso)
+**Pré-requisito:** Criar um usuário primeiro (ver seção 5.1)
+
+**Método:** `POST`  
+**URL:** `http://localhost:8080/auth/login`  
+**Headers:** `Content-Type: application/json`  
+**Body:**
+```json
+{
+  "login": "joaosilva",
+  "password": "senha123"
+}
+```
+
+**Resposta Esperada (200):**
+```
+Status: 200 OK
+(Sessão criada automaticamente - cookie JSESSIONID será armazenado)
+```
+
+### 0.2. Login (usuário não encontrado)
+**Método:** `POST`  
+**URL:** `http://localhost:8080/auth/login`  
+**Headers:** `Content-Type: application/json`  
+**Body:**
+```json
+{
+  "login": "usuario_inexistente",
+  "password": "senha123"
+}
+```
+
+**Resposta Esperada (404):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/resource-not-found",
+  "title": "Resource Not Found",
+  "status": 404,
+  "detail": "User not found with the provided details."
+}
+```
+
+### 0.3. Login (senha incorreta)
+**Pré-requisito:** Ter um usuário criado
+
+**Método:** `POST`  
+**URL:** `http://localhost:8080/auth/login`  
+**Headers:** `Content-Type: application/json`  
+**Body:**
+```json
+{
+  "login": "joaosilva",
+  "password": "senha_errada"
+}
+```
+
+**Resposta Esperada (404):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/resource-not-found",
+  "title": "Resource Not Found",
+  "status": 404,
+  "detail": "User not found with the provided details."
+}
+```
+
+### 0.4. Login (validação - login vazio)
+**Método:** `POST`  
+**URL:** `http://localhost:8080/auth/login`  
+**Headers:** `Content-Type: application/json`  
+**Body:**
+```json
+{
+  "login": "",
+  "password": "senha123"
+}
+```
+
+**Resposta Esperada (400):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Validation failed",
+  "errors": {
+    "login": "Login is required"
+  }
+}
+```
+
+### 0.5. Login (validação - senha vazia)
+**Método:** `POST`  
+**URL:** `http://localhost:8080/auth/login`  
+**Headers:** `Content-Type: application/json`  
+**Body:**
+```json
+{
+  "login": "joaosilva",
+  "password": ""
+}
+```
+
+**Resposta Esperada (400):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Validation failed",
+  "errors": {
+    "password": "Password is required"
+  }
+}
+```
+
+### 0.6. Logout
+**Pré-requisito:** Fazer login primeiro
+
+**Método:** `POST`  
+**URL:** `http://localhost:8080/auth/logout`
+
+**Resposta Esperada (200):**
+```
+Status: 200 OK
+(Sessão invalidada)
+```
+
+### 0.7. Acesso não autorizado (sem login)
+**Método:** `GET`  
+**URL:** `http://localhost:8080/v1/users`
+
+**Resposta Esperada (401):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/unauthorized",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Authentication required. Please log in to access this resource."
+}
+```
+
+### 0.8. Acesso não autorizado (após logout)
+**Pré-requisito:** Fazer login e depois logout
+
+**Método:** `GET`  
+**URL:** `http://localhost:8080/v1/users`
+
+**Resposta Esperada (401):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/unauthorized",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Authentication required. Please log in to access this resource."
+}
+```
+
+---
+
 ## 🔴 1. ResourceNotFoundException (404 - Not Found)
 
 ### 1.1. Buscar usuário inexistente por ID
+**Pré-requisito:** Fazer login primeiro (ver seção 0.1)
+
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/99999`
 
@@ -34,6 +205,8 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 ```
 
 ### 1.2. Atualizar usuário inexistente
+**Pré-requisito:** Fazer login primeiro (ver seção 0.1)
+
 **Método:** `PUT`  
 **URL:** `http://localhost:8080/v1/users/99999`  
 **Headers:** `Content-Type: application/json`  
@@ -61,6 +234,8 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 ```
 
 ### 1.3. Deletar usuário inexistente
+**Pré-requisito:** Fazer login primeiro (ver seção 0.1)
+
 **Método:** `DELETE`  
 **URL:** `http://localhost:8080/v1/users/99999`
 
@@ -75,6 +250,8 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 ```
 
 ### 1.4. Buscar usuário por login inexistente
+**Pré-requisito:** Fazer login primeiro (ver seção 0.1)
+
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/search/login?login=login_inexistente`
 
@@ -89,6 +266,8 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 ```
 
 ### 1.5. Buscar usuário por email inexistente
+**Pré-requisito:** Fazer login primeiro (ver seção 0.1)
+
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/search/email?email=email_inexistente@teste.com`
 
@@ -103,6 +282,8 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 ```
 
 ### 1.6. Alterar senha de usuário inexistente
+**Pré-requisito:** Fazer login primeiro (ver seção 0.1)
+
 **Método:** `PATCH`  
 **URL:** `http://localhost:8080/v1/users/99999/password`  
 **Headers:** `Content-Type: application/json`  
@@ -163,7 +344,7 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 ```
 
 ### 2.2. Alterar senha com senha atual incorreta (quando senha atual = nova senha)
-**Pré-requisito:** Tenha um usuário criado (pegar o ID)
+**Pré-requisito:** Tenha um usuário criado (pegar o ID) e fazer login primeiro (ver seção 0.1)
 
 **Método:** `PATCH`  
 **URL:** `http://localhost:8080/v1/users/{id}/password`  
@@ -352,7 +533,7 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 ```
 
 ### 3.6. Atualizar usuário - Campo name vazio
-**Pré-requisito:** Tenha um usuário criado (pegar o ID)
+**Pré-requisito:** Tenha um usuário criado (pegar o ID) e fazer login primeiro (ver seção 0.1)
 
 **Método:** `PUT`  
 **URL:** `http://localhost:8080/v1/users/{id}`  
@@ -384,7 +565,7 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 ```
 
 ### 3.7. Alterar senha - Campos vazios
-**Pré-requisito:** Tenha um usuário criado (pegar o ID)
+**Pré-requisito:** Tenha um usuário criado (pegar o ID) e fazer login primeiro (ver seção 0.1)
 
 **Método:** `PATCH`  
 **URL:** `http://localhost:8080/v1/users/{id}/password`  
@@ -412,7 +593,7 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 ```
 
 ### 3.8. Alterar senha - Nova senha muito curta
-**Pré-requisito:** Tenha um usuário criado (pegar o ID)
+**Pré-requisito:** Tenha um usuário criado (pegar o ID) e fazer login primeiro (ver seção 0.1)
 
 **Método:** `PATCH`  
 **URL:** `http://localhost:8080/v1/users/{id}/password`  
@@ -684,7 +865,7 @@ name=João
 
 ## ✅ 5. Casos de Sucesso (para referência)
 
-### 4.1. Criar usuário válido
+### 5.1. Criar usuário válido (público)
 **Método:** `POST`  
 **URL:** `http://localhost:8080/v1/users`  
 **Headers:** `Content-Type: application/json`  
@@ -724,7 +905,29 @@ name=João
 }
 ```
 
-### 5.2. Listar todos os usuários
+### 5.2. Login (antes de acessar endpoints protegidos)
+**Pré-requisito:** Criar usuário primeiro (ver seção 5.1)
+
+**Método:** `POST`  
+**URL:** `http://localhost:8080/auth/login`  
+**Headers:** `Content-Type: application/json`  
+**Body:**
+```json
+{
+  "login": "joaosilva",
+  "password": "senha123"
+}
+```
+
+**Resposta Esperada (200):**
+```
+Status: 200 OK
+(Sessão criada - cookie JSESSIONID armazenado)
+```
+
+### 5.3. Listar todos os usuários
+**Pré-requisito:** Fazer login primeiro (ver seção 5.2)
+
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users`
 
@@ -749,7 +952,9 @@ name=João
 ]
 ```
 
-### 5.3. Buscar usuário por ID
+### 5.4. Buscar usuário por ID
+**Pré-requisito:** Fazer login primeiro (ver seção 5.2)
+
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/1`
 
@@ -772,7 +977,9 @@ name=João
 }
 ```
 
-### 5.4. Buscar usuários por nome
+### 5.5. Buscar usuários por nome
+**Pré-requisito:** Fazer login primeiro (ver seção 5.2)
+
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/search/name?name=João`
 
@@ -797,7 +1004,9 @@ name=João
 ]
 ```
 
-### 5.5. Buscar usuário por login
+### 5.6. Buscar usuário por login
+**Pré-requisito:** Fazer login primeiro (ver seção 5.2)
+
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/search/login?login=joaosilva`
 
@@ -820,7 +1029,9 @@ name=João
 }
 ```
 
-### 5.6. Buscar usuário por email
+### 5.7. Buscar usuário por email
+**Pré-requisito:** Fazer login primeiro (ver seção 5.2)
+
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/search/email?email=joao@email.com`
 
@@ -843,7 +1054,9 @@ name=João
 }
 ```
 
-### 5.7. Atualizar usuário
+### 5.8. Atualizar usuário
+**Pré-requisito:** Fazer login primeiro (ver seção 5.2)
+
 **Método:** `PUT`  
 **URL:** `http://localhost:8080/v1/users/1`  
 **Headers:** `Content-Type: application/json`  
@@ -879,7 +1092,9 @@ name=João
 }
 ```
 
-### 5.8. Alterar senha
+### 5.9. Alterar senha
+**Pré-requisito:** Fazer login primeiro (ver seção 5.2)
+
 **Método:** `PATCH`  
 **URL:** `http://localhost:8080/v1/users/1/password`  
 **Headers:** `Content-Type: application/json`  
@@ -893,7 +1108,9 @@ name=João
 
 **Resposta Esperada (204):** *(No Content)*
 
-### 5.9. Deletar usuário
+### 5.10. Deletar usuário
+**Pré-requisito:** Fazer login primeiro (ver seção 5.2)
+
 **Método:** `DELETE`  
 **URL:** `http://localhost:8080/v1/users/1`
 
@@ -904,6 +1121,16 @@ name=João
 ## 📋 6. Checklist de Testes
 
 Use esta checklist para garantir que testou todos os cenários:
+
+- [ ] **Autenticação**
+  - [ ] Login (sucesso)
+  - [ ] Login (usuário não encontrado - 404)
+  - [ ] Login (senha incorreta - 404)
+  - [ ] Login (validação - login vazio)
+  - [ ] Login (validação - senha vazia)
+  - [ ] Logout
+  - [ ] Acesso não autorizado (sem login - 401)
+  - [ ] Acesso não autorizado (após logout - 401)
 
 - [ ] **ResourceNotFoundException (404)**
   - [ ] GET usuário inexistente por ID
@@ -942,7 +1169,8 @@ Use esta checklist para garantir que testou todos os cenários:
   - [ ] Endpoint inexistente (POST)
 
 - [ ] **Casos de Sucesso**
-  - [ ] Criar usuário válido
+  - [ ] Criar usuário válido (público)
+  - [ ] Login (antes de acessar endpoints protegidos)
   - [ ] Listar todos os usuários
   - [ ] Buscar usuário por ID
   - [ ] Buscar usuário por nome
@@ -984,6 +1212,7 @@ Configure estes headers para todas as requisições que precisam de body:
 
 4. **Status Codes**: Verifique sempre o status code HTTP na resposta:
    - 400: Bad Request (validação, erro de domínio, JSON malformado, parâmetro faltando, tipo incorreto)
+   - 401: Unauthorized (acesso não autorizado - sessão inválida ou ausente) - retorna ProblemDetail
    - 404: Not Found (recurso não encontrado, endpoint não encontrado)
    - 405: Method Not Allowed (método HTTP não suportado)
    - 415: Unsupported Media Type (Content-Type não suportado)
@@ -992,7 +1221,14 @@ Configure estes headers para todas as requisições que precisam de body:
    - 204: No Content (sucesso em delete)
    - 500: Internal Server Error (erro interno do servidor)
 
-5. **Formato de Erro**: Todas as respostas de erro seguem o padrão RFC 7807 (Problem Detail):
+5. **Autenticação**: A maioria dos endpoints requer autenticação. Você deve:
+   - Primeiro criar um usuário (POST /v1/users - público)
+   - Fazer login (POST /auth/login) para criar uma sessão
+   - A sessão é mantida automaticamente pelo Postman através de cookies
+   - Para testar endpoints protegidos, sempre faça login primeiro
+   - O cadastro de usuário (POST /v1/users) é público e não requer autenticação
+
+6. **Formato de Erro**: Todas as respostas de erro seguem o padrão RFC 7807 (Problem Detail):
    - `type`: URI que identifica o tipo de problema
    - `title`: Título legível do problema
    - `status`: Código HTTP

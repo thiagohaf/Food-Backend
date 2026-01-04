@@ -8,9 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
-/**
- * DTO para representar erros no formato ProblemDetail (RFC 7807)
- */
 @Data
 @Builder
 @NoArgsConstructor
