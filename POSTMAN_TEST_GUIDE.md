@@ -16,9 +16,10 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 3. [MethodArgumentNotValidException (400)](#-3-methodargumentnotvalidexception-400---validation-error)
 4. [Novos Tratamentos de Erro (400, 404, 405, 415)](#-4-novos-tratamentos-de-erro-400-404-405-415)
 5. [Casos de Sucesso](#-5-casos-de-sucesso-para-referência)
-6. [Checklist de Testes](#-6-checklist-de-testes)
-7. [Configuração no Postman](#-configuração-no-postman)
-8. [Notas Importantes](#-notas-importantes)
+6. [Endpoints V2 - JWT Authentication](#-6-endpoints-v2---jwt-authentication)
+7. [Checklist de Testes](#-7-checklist-de-testes)
+8. [Configuração no Postman](#-configuração-no-postman)
+9. [Notas Importantes](#-notas-importantes)
 
 ---
 
@@ -1145,7 +1146,194 @@ Status: 200 OK
 
 ---
 
-## 📋 6. Checklist de Testes
+## 🔐 6. Endpoints V2 - JWT Authentication
+
+A API agora possui uma versão 2 dos endpoints que utiliza autenticação baseada em **JWT (JSON Web Tokens)** com Spring Security. Todos os erros também retornam **ProblemDetail (RFC 7807)**.
+
+### Diferenças entre V1 e V2
+
+- **V1**: Autenticação stateful baseada em HttpSession (cookies)
+- **V2**: Autenticação stateless baseada em JWT tokens no header Authorization
+
+### Endpoints V2
+
+- `POST /v2/auth/login` - Login e obtenção de JWT token (público)
+- `POST /v2/users` - Criar usuário (público)
+- `GET /v2/users` - Listar usuários (requer JWT)
+- `GET /v2/users/{id}` - Buscar usuário por ID (requer JWT)
+- `GET /v2/users/search/name?name={nome}` - Buscar por nome (requer JWT)
+- `GET /v2/users/search/login?login={login}` - Buscar por login (requer JWT)
+- `GET /v2/users/search/email?email={email}` - Buscar por email (requer JWT)
+- `PUT /v2/users/{id}` - Atualizar usuário (requer JWT)
+- `PATCH /v2/users/{id}/password` - Alterar senha (requer JWT)
+- `DELETE /v2/users/{id}` - Deletar usuário (requer JWT)
+
+### Como usar JWT no Postman
+
+1. **Fazer Login V2**: Execute `POST /v2/auth/login` com login e senha
+2. **Obter Token**: A resposta contém um objeto `{"token": "...", "type": "Bearer"}`
+3. **Usar Token**: Adicione o header `Authorization: Bearer {token}` em todas as requisições protegidas
+
+**Nota**: A collection do Postman possui um script que salva automaticamente o token na variável `jwt_token` após o login bem-sucedido.
+
+### 6.1. Login V2 (sucesso)
+
+**Pré-requisito:** Criar um usuário primeiro (pode usar v1 ou v2)
+
+**Método:** `POST`  
+**URL:** `http://localhost:8080/v2/auth/login`  
+**Headers:** `Content-Type: application/json`  
+**Body:**
+```json
+{
+  "login": "joaosilva",
+  "password": "senha123"
+}
+```
+
+**Resposta Esperada (200):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "type": "Bearer"
+}
+```
+
+**Nota:** O token é salvo automaticamente na variável `jwt_token` pela collection do Postman.
+
+### 6.2. Login V2 (usuário não encontrado)
+
+**Método:** `POST`  
+**URL:** `http://localhost:8080/v2/auth/login`  
+**Headers:** `Content-Type: application/json`  
+**Body:**
+```json
+{
+  "login": "usuario_inexistente",
+  "password": "senha123"
+}
+```
+
+**Resposta Esperada (404):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/resource-not-found",
+  "title": "Resource Not Found",
+  "status": 404,
+  "detail": "User not found with the provided details."
+}
+```
+
+### 6.3. Acesso não autorizado V2 (sem token)
+
+**Método:** `GET`  
+**URL:** `http://localhost:8080/v2/users`
+
+**Resposta Esperada (401):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/unauthorized",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Authentication required. Please provide a valid JWT token in the Authorization header."
+}
+```
+
+### 6.4. Listar usuários V2 (com JWT)
+
+**Pré-requisito:** Fazer login v2 primeiro (ver seção 6.1)
+
+**Método:** `GET`  
+**URL:** `http://localhost:8080/v2/users`  
+**Headers:** `Authorization: Bearer {{jwt_token}}`
+
+**Resposta Esperada (200):**
+```json
+[
+  {
+    "id": 1,
+    "name": "João Silva",
+    "email": "joao@email.com",
+    "login": "joaosilva",
+    "type": "CUSTOMER",
+    ...
+  }
+]
+```
+
+### 6.5. Criar usuário V2 (público)
+
+**Método:** `POST`  
+**URL:** `http://localhost:8080/v2/users`  
+**Headers:** `Content-Type: application/json`  
+**Body:**
+```json
+{
+  "name": "Maria Santos",
+  "email": "maria@email.com",
+  "login": "mariasantos",
+  "password": "senha123",
+  "type": "CUSTOMER",
+  "address": {
+    "street": "Rua V2",
+    "number": "789",
+    "city": "São Paulo",
+    "zipCode": "01234-567"
+  }
+}
+```
+
+**Resposta Esperada (201):**
+```json
+{
+  "id": 2,
+  "name": "Maria Santos",
+  "email": "maria@email.com",
+  "login": "mariasantos",
+  "type": "CUSTOMER",
+  ...
+}
+```
+
+### 6.6. Erros V2 (ProblemDetail)
+
+Todos os erros nos endpoints v2 retornam **ProblemDetail (RFC 7807)**, incluindo:
+- **401 Unauthorized**: Token ausente ou inválido
+- **404 Not Found**: Recurso não encontrado
+- **400 Bad Request**: Validações, erros de domínio, JSON malformado, etc.
+- **405 Method Not Allowed**: Método HTTP não suportado
+- **415 Unsupported Media Type**: Content-Type não suportado
+
+**Exemplo de erro 401:**
+```json
+{
+  "type": "https://api.food-backend.com/problems/unauthorized",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Authentication required. Please provide a valid JWT token in the Authorization header."
+}
+```
+
+**Exemplo de erro 404:**
+```json
+{
+  "type": "https://api.food-backend.com/problems/resource-not-found",
+  "title": "Resource Not Found",
+  "status": 404,
+  "detail": "User not found with ID: 99999"
+}
+```
+
+### Configuração da Collection
+
+A collection do Postman possui:
+- Variável `jwt_token`: Armazenada automaticamente após login v2
+- Scripts de teste: Capturam o token automaticamente
+- Exemplos de todas as requisições v2 com e sem token
+
+---
+
+## 📋 7. Checklist de Testes
 
 Use esta checklist para garantir que testou todos os cenários:
 
@@ -1207,6 +1395,21 @@ Use esta checklist para garantir que testou todos os cenários:
   - [ ] Alterar senha
   - [ ] Deletar usuário
 
+- [ ] **Endpoints V2 - JWT Authentication**
+  - [ ] Login V2 (sucesso - obter token)
+  - [ ] Login V2 (usuário não encontrado - 404)
+  - [ ] Login V2 (senha incorreta - 404)
+  - [ ] Acesso não autorizado V2 (sem token - 401)
+  - [ ] Acesso não autorizado V2 (token inválido - 401)
+  - [ ] Criar usuário V2 (público)
+  - [ ] Listar usuários V2 (com JWT)
+  - [ ] Buscar usuário por ID V2 (com JWT)
+  - [ ] Buscar usuários por nome V2 (com JWT)
+  - [ ] Atualizar usuário V2 (com JWT)
+  - [ ] Erro V2 - usuário inexistente (404 com ProblemDetail)
+  - [ ] Erro V2 - email duplicado (400 com ProblemDetail)
+  - [ ] Erro V2 - validação campos inválidos (400 com ProblemDetail)
+
 ---
 
 ## 🔧 Configuração no Postman
@@ -1224,8 +1427,9 @@ Recomenda-se criar variáveis para facilitar os testes:
   - `http://localhost:8080` (execução local)
   - `http://localhost:8081` (Docker Compose)
 - `user_id`: (será preenchido após criar um usuário)
+- `jwt_token`: (armazenado automaticamente após login v2 bem-sucedido)
 
-**Dica:** A coleção já vem pré-configurada com a variável `base_url`. Basta ajustar o valor conforme sua forma de execução.
+**Dica:** A coleção já vem pré-configurada com as variáveis `base_url`, `user_id` e `jwt_token`. O token JWT é capturado automaticamente pelo script de teste após login v2.
 
 ### Headers Padrão
 Configure estes headers para todas as requisições que precisam de body:
@@ -1258,12 +1462,20 @@ Configure estes headers para todas as requisições que precisam de body:
    - 204: No Content (sucesso em delete)
    - 500: Internal Server Error (erro interno do servidor)
 
-5. **Autenticação**: A maioria dos endpoints requer autenticação. Você deve:
+5. **Autenticação**: A API possui duas versões de autenticação:
+   
+   **V1 (HttpSession):**
    - Primeiro criar um usuário (POST /v1/users - público)
    - Fazer login (POST /auth/login) para criar uma sessão
    - A sessão é mantida automaticamente pelo Postman através de cookies
    - Para testar endpoints protegidos, sempre faça login primeiro
-   - O cadastro de usuário (POST /v1/users) é público e não requer autenticação
+   
+   **V2 (JWT):**
+   - Primeiro criar um usuário (POST /v2/users ou POST /v1/users - ambos públicos)
+   - Fazer login (POST /v2/auth/login) para obter um token JWT
+   - O token é salvo automaticamente na variável `jwt_token` pela collection
+   - Adicione o header `Authorization: Bearer {{jwt_token}}` em todas as requisições protegidas
+   - O cadastro de usuário (POST /v2/users) é público e não requer autenticação
 
 6. **Formato de Erro**: Todas as respostas de erro seguem o padrão RFC 7807 (Problem Detail):
    - `type`: URI que identifica o tipo de problema
@@ -1276,7 +1488,13 @@ Configure estes headers para todas as requisições que precisam de body:
    - Spring Boot: 4.0.1
    - Java: 21
    - SpringDoc OpenAPI: 2.7.0
+   - Spring Security: (versão incluída no Spring Boot 4.0.1)
+   - JWT: jjwt 0.12.5
    - Esta collection foi testada com a versão 0.0.1-SNAPSHOT
+   
+   **Versões de Endpoints:**
+   - **V1**: Endpoints com autenticação HttpSession (stateful)
+   - **V2**: Endpoints com autenticação JWT (stateless) usando Spring Security
 
 8. **Documentação Adicional**: 
    - Swagger UI: `http://localhost:8080/swagger-ui.html` (ou `http://localhost:8081` no Docker)

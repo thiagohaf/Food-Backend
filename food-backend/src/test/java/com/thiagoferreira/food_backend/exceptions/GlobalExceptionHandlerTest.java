@@ -18,8 +18,11 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.*;
 
@@ -51,21 +54,56 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Should handle UnauthorizedException")
+    @DisplayName("Should handle UnauthorizedException with instance and properties")
     void shouldHandleUnauthorizedException() {
         // Arrange
         UnauthorizedException ex = new UnauthorizedException(
                 com.thiagoferreira.food_backend.domain.enums.ErrorMessages.UNAUTHORIZED_ACCESS
         );
+        
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getRequestURI()).thenReturn("/v1/users");
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/v1/users"));
+        
+        ServletWebRequest webRequest = new ServletWebRequest(request);
 
         // Act
-        ResponseEntity<ProblemDetail> response = exceptionHandler.handleUnauthorizedException(ex);
+        ResponseEntity<ProblemDetail> response = exceptionHandler.handleUnauthorizedException(ex, webRequest);
 
         // Assert
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Unauthorized", response.getBody().getTitle());
         assertTrue(response.getBody().getType().toString().contains("unauthorized"));
+        assertNotNull(response.getBody().getInstance());
+        assertTrue(response.getBody().getInstance().toString().contains("/v1/users"));
+        assertNotNull(response.getBody().getProperties());
+        assertEquals("/v1/users", response.getBody().getProperties().get("path"));
+        assertEquals("GET", response.getBody().getProperties().get("method"));
+    }
+    
+    @Test
+    @DisplayName("Should handle UnauthorizedException with non-ServletWebRequest")
+    void shouldHandleUnauthorizedExceptionWithNonServletWebRequest() {
+        // Arrange
+        UnauthorizedException ex = new UnauthorizedException(
+                com.thiagoferreira.food_backend.domain.enums.ErrorMessages.UNAUTHORIZED_ACCESS
+        );
+        
+        WebRequest request = mock(WebRequest.class);
+        when(request.getDescription(false)).thenReturn("uri=/v1/users");
+
+        // Act
+        ResponseEntity<ProblemDetail> response = exceptionHandler.handleUnauthorizedException(ex, request);
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Unauthorized", response.getBody().getTitle());
+        assertTrue(response.getBody().getType().toString().contains("unauthorized"));
+        assertNotNull(response.getBody().getInstance());
+        assertEquals("/v1/users", response.getBody().getInstance().toString());
     }
 
     @Test

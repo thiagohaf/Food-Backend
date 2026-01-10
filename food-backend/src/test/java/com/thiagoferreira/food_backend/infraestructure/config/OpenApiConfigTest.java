@@ -27,7 +27,7 @@ class OpenApiConfigTest {
         assertNotNull(openAPI);
         assertNotNull(openAPI.getInfo());
         assertEquals("Food API", openAPI.getInfo().getTitle());
-        assertEquals("v1.0", openAPI.getInfo().getVersion());
+        assertEquals("v2.0", openAPI.getInfo().getVersion());
         assertNotNull(openAPI.getInfo().getLicense());
         assertEquals("MIT", openAPI.getInfo().getLicense().getName());
         assertNotNull(openAPI.getInfo().getContact());

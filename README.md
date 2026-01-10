@@ -26,7 +26,9 @@ API RESTful desenvolvida em Spring Boot para gerenciamento de usuários do siste
 
 ### Segurança
 - **jBCrypt (v0.4)** - Biblioteca para hashing de senhas (BCrypt)
-- **HttpSession** - Autenticação stateful baseada em sessão
+- **HttpSession** - Autenticação stateful baseada em sessão (V1)
+- **Spring Security** - Framework de segurança (V2)
+- **JWT (jjwt 0.12.5)** - JSON Web Tokens para autenticação stateless (V2)
 
 ### Utilitários
 - **Lombok** - Redução de boilerplate
@@ -180,7 +182,7 @@ A documentação completa da API está disponível através do **Swagger UI** qu
 
 ### Endpoints Principais
 
-#### Autenticação (`/auth`)
+#### Autenticação V1 (`/auth`)
 
 | Método | Endpoint | Descrição | Autenticação |
 |--------|----------|-----------|--------------|
@@ -197,7 +199,7 @@ A documentação completa da API está disponível através do **Swagger UI** qu
 
 **Nota:** Após o login bem-sucedido, uma sessão HTTP é criada e o ID do usuário é armazenado na sessão. Esta sessão deve ser mantida pelo cliente (cookies) para acessar endpoints protegidos.
 
-#### Usuários (`/v1/users`)
+#### Usuários V1 (`/v1/users`)
 
 | Método | Endpoint | Descrição | Autenticação |
 |--------|----------|-----------|--------------|
@@ -210,6 +212,46 @@ A documentação completa da API está disponível através do **Swagger UI** qu
 | PUT | `/v1/users/{id}` | Atualizar informações do usuário | Requerida |
 | PATCH | `/v1/users/{id}/password` | Alterar senha do usuário | Requerida |
 | DELETE | `/v1/users/{id}` | Deletar usuário | Requerida |
+
+#### Autenticação V2 (`/v2/auth`)
+
+| Método | Endpoint | Descrição | Autenticação |
+|--------|----------|-----------|--------------|
+| POST | `/v2/auth/login` | Autenticar usuário e obter JWT token | Não requerida |
+
+**Login Request:**
+```json
+{
+  "login": "usuario123",
+  "password": "senha123"
+}
+```
+
+**Login Response (200):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "type": "Bearer"
+}
+```
+
+**Nota:** Após o login bem-sucedido, use o token retornado no header `Authorization: Bearer {token}` para acessar endpoints protegidos.
+
+#### Usuários V2 (`/v2/users`)
+
+| Método | Endpoint | Descrição | Autenticação |
+|--------|----------|-----------|--------------|
+| POST | `/v2/users` | Criar novo usuário | Não requerida (público) |
+| GET | `/v2/users` | Listar todos os usuários | Requerida (JWT) |
+| GET | `/v2/users/{id}` | Buscar usuário por ID | Requerida (JWT) |
+| GET | `/v2/users/search/name?name={nome}` | Buscar usuários por nome | Requerida (JWT) |
+| GET | `/v2/users/search/login?login={login}` | Buscar usuário por login | Requerida (JWT) |
+| GET | `/v2/users/search/email?email={email}` | Buscar usuário por email | Requerida (JWT) |
+| PUT | `/v2/users/{id}` | Atualizar informações do usuário | Requerida (JWT) |
+| PATCH | `/v2/users/{id}/password` | Alterar senha do usuário | Requerida (JWT) |
+| DELETE | `/v2/users/{id}` | Deletar usuário | Requerida (JWT) |
+
+**Nota:** Todos os erros nos endpoints V2 retornam **ProblemDetail (RFC 7807)**, incluindo erros de autenticação do Spring Security.
 
 ### Modelo de Dados
 
@@ -235,6 +277,10 @@ A documentação completa da API está disponível através do **Swagger UI** qu
 - `CUSTOMER` - Cliente
 
 ## 🔐 Autenticação e Segurança
+
+A aplicação possui **duas versões de autenticação**:
+
+### Versão 1 (V1) - HttpSession
 
 A aplicação implementa autenticação **stateful** baseada em **HttpSession**, sem utilizar Spring Security. A proteção dos endpoints é feita manualmente através de um `HandlerInterceptor`.
 
@@ -302,6 +348,94 @@ GET /v1/users
 POST /auth/logout
 # Resposta: 200 OK (sessão invalidada)
 ```
+
+### Versão 2 (V2) - JWT com Spring Security
+
+A versão 2 dos endpoints implementa autenticação **stateless** baseada em **JWT (JSON Web Tokens)** usando Spring Security. Todos os erros retornam **ProblemDetail (RFC 7807)**.
+
+#### Como Funciona
+
+1. **Login**: O usuário faz uma requisição `POST /v2/auth/login` com login e senha
+2. **Validação**: O sistema busca o usuário pelo login e verifica a senha usando BCrypt
+3. **Token JWT**: Se válido, retorna um token JWT no formato `{"token": "...", "type": "Bearer"}`
+4. **Acesso**: Endpoints protegidos requerem o header `Authorization: Bearer {token}`
+5. **Validação**: O Spring Security valida o token JWT automaticamente
+
+#### Endpoints Públicos V2
+
+Os seguintes endpoints **não requerem** autenticação:
+- `POST /v2/auth/login` - Login de usuário (retorna JWT token)
+- `POST /v2/users` - Cadastro de novo usuário (público)
+
+#### Endpoints Protegidos V2
+
+Todos os demais endpoints `/v2/**` requerem autenticação via JWT. Se uma requisição for feita sem token válido, será retornado **401 Unauthorized** com um objeto ProblemDetail no formato RFC 7807:
+
+```json
+{
+  "type": "https://api.food-backend.com/problems/unauthorized",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Authentication required. Please provide a valid JWT token in the Authorization header."
+}
+```
+
+#### Endpoints V2
+
+| Método | Endpoint | Descrição | Autenticação |
+|--------|----------|-----------|--------------|
+| POST | `/v2/auth/login` | Login e obtenção de JWT token | Não requerida |
+| POST | `/v2/users` | Criar novo usuário | Não requerida (público) |
+| GET | `/v2/users` | Listar todos os usuários | Requerida (JWT) |
+| GET | `/v2/users/{id}` | Buscar usuário por ID | Requerida (JWT) |
+| GET | `/v2/users/search/name?name={nome}` | Buscar usuários por nome | Requerida (JWT) |
+| GET | `/v2/users/search/login?login={login}` | Buscar usuário por login | Requerida (JWT) |
+| GET | `/v2/users/search/email?email={email}` | Buscar usuário por email | Requerida (JWT) |
+| PUT | `/v2/users/{id}` | Atualizar informações do usuário | Requerida (JWT) |
+| PATCH | `/v2/users/{id}/password` | Alterar senha do usuário | Requerida (JWT) |
+| DELETE | `/v2/users/{id}` | Deletar usuário | Requerida (JWT) |
+
+#### Exemplo de Fluxo V2
+
+```bash
+# 1. Criar usuário (público)
+POST /v2/users
+{
+  "name": "Maria Santos",
+  "email": "maria@email.com",
+  "login": "mariasantos",
+  "password": "senha123",
+  "type": "CUSTOMER"
+}
+# Resposta: 201 Created
+
+# 2. Fazer login v2 (obter token JWT)
+POST /v2/auth/login
+{
+  "login": "mariasantos",
+  "password": "senha123"
+}
+# Resposta: 200 OK
+# {
+#   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#   "type": "Bearer"
+# }
+
+# 3. Acessar endpoints protegidos (usar token no header)
+GET /v2/users
+Headers: Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Resposta: 200 OK com lista de usuários
+```
+
+#### Configuração JWT
+
+As propriedades JWT podem ser configuradas no `application.properties`:
+- `jwt.secret`: Chave secreta para assinar tokens (padrão: valor padrão seguro)
+- `jwt.expiration`: Tempo de expiração em milissegundos (padrão: 86400000 = 24 horas)
+
+Ou via variáveis de ambiente:
+- `JWT_SECRET`: Chave secreta para assinar tokens
+- `JWT_EXPIRATION`: Tempo de expiração em milissegundos
 
 ## 🔒 Tratamento de Erros
 
@@ -554,6 +688,8 @@ Para questões ou suporte, consulte:
 - **Swagger Annotations**: 2.2.22
 - **JaCoCo**: 0.8.11
 - **jBCrypt**: 0.4
+- **Spring Security**: (incluído no Spring Boot 4.0.1)
+- **JWT (jjwt)**: 0.12.5
 
 ---
 

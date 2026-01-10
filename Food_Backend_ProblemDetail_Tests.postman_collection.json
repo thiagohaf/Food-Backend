@@ -976,6 +976,324 @@
 				}
 			],
 			"description": "Casos de sucesso para referência"
+		},
+		{
+			"name": "6. Endpoints V2 - JWT Authentication",
+			"item": [
+				{
+					"name": "6.1 Autenticação V2",
+					"item": [
+						{
+							"name": "POST - Login V2 (sucesso)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    var jsonData = pm.response.json();",
+											"    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"login\": \"joaosilva\",\n  \"password\": \"senha123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/v2/auth/login",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "auth", "login"]
+								},
+								"description": "Autentica um usuário e retorna JWT token. O token é salvo automaticamente na variável jwt_token. PRÉ-REQUISITO: Criar um usuário primeiro com login 'joaosilva' e senha 'senha123'"
+							},
+							"response": []
+						},
+						{
+							"name": "POST - Login V2 (usuário não encontrado)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"login\": \"usuario_inexistente\",\n  \"password\": \"senha123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/v2/auth/login",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "auth", "login"]
+								},
+								"description": "Testa login v2 com usuário inexistente - deve retornar 404 com ProblemDetail"
+							},
+							"response": []
+						},
+						{
+							"name": "POST - Login V2 (senha incorreta)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"login\": \"joaosilva\",\n  \"password\": \"senha_errada\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/v2/auth/login",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "auth", "login"]
+								},
+								"description": "Testa login v2 com senha incorreta - deve retornar 404 com ProblemDetail"
+							},
+							"response": []
+						},
+						{
+							"name": "GET - Acesso não autorizado V2 (sem token)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/v2/users",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users"]
+								},
+								"description": "Testa acesso a endpoint v2 protegido sem JWT token - deve retornar 401 com ProblemDetail"
+							},
+							"response": []
+						},
+						{
+							"name": "GET - Acesso não autorizado V2 (token inválido)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer token_invalido_12345"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/v2/users",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users"]
+								},
+								"description": "Testa acesso a endpoint v2 protegido com token JWT inválido - deve retornar 401 com ProblemDetail"
+							},
+							"response": []
+						}
+					],
+					"description": "Endpoints e testes relacionados à autenticação V2 com JWT"
+				},
+				{
+					"name": "6.2 Casos de Sucesso V2",
+					"item": [
+						{
+							"name": "POST - Criar usuário V2 (público)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Maria Santos\",\n  \"email\": \"maria@email.com\",\n  \"login\": \"mariasantos\",\n  \"password\": \"senha123\",\n  \"type\": \"CUSTOMER\",\n  \"address\": {\n    \"street\": \"Rua V2\",\n    \"number\": \"789\",\n    \"city\": \"São Paulo\",\n    \"zipCode\": \"01234-567\"\n  }\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/v2/users",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users"]
+								},
+								"description": "Cria um usuário válido no endpoint v2 (público, não requer JWT)"
+							},
+							"response": []
+						},
+						{
+							"name": "GET - Listar todos os usuários V2",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/v2/users",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users"]
+								},
+								"description": "Lista todos os usuários usando JWT token. PRÉ-REQUISITO: Fazer login v2 primeiro para obter o token"
+							},
+							"response": []
+						},
+						{
+							"name": "GET - Buscar usuário por ID V2",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/v2/users/{{user_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users", "{{user_id}}"]
+								},
+								"description": "Busca um usuário específico por ID usando JWT token. PRÉ-REQUISITO: Fazer login v2 primeiro"
+							},
+							"response": []
+						},
+						{
+							"name": "GET - Buscar usuários por nome V2",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/v2/users/search/name?name=Maria",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users", "search", "name"],
+									"query": [
+										{
+											"key": "name",
+											"value": "Maria"
+										}
+									]
+								},
+								"description": "Busca usuários por nome usando JWT token. PRÉ-REQUISITO: Fazer login v2 primeiro"
+							},
+							"response": []
+						},
+						{
+							"name": "PUT - Atualizar usuário V2",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Maria Santos Atualizada\",\n  \"address\": {\n    \"street\": \"Rua Nova V2\",\n    \"number\": \"999\",\n    \"city\": \"Rio de Janeiro\",\n    \"zipCode\": \"20000-000\"\n  }\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/v2/users/{{user_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users", "{{user_id}}"]
+								},
+								"description": "Atualiza informações do usuário usando JWT token. PRÉ-REQUISITO: Fazer login v2 primeiro"
+							},
+							"response": []
+						}
+					],
+					"description": "Casos de sucesso para endpoints V2 com JWT"
+				},
+				{
+					"name": "6.3 Erros V2 (ProblemDetail)",
+					"item": [
+						{
+							"name": "GET - Usuário inexistente V2",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/v2/users/99999",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users", "99999"]
+								},
+								"description": "Testa ResourceNotFoundException v2 - deve retornar 404 com ProblemDetail. PRÉ-REQUISITO: Fazer login v2 primeiro"
+							},
+							"response": []
+						},
+						{
+							"name": "POST - Criar usuário V2 (email duplicado)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Teste Duplicado\",\n  \"email\": \"maria@email.com\",\n  \"login\": \"testeduplicado\",\n  \"password\": \"senha123\",\n  \"type\": \"CUSTOMER\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/v2/users",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users"]
+								},
+								"description": "Testa DomainValidationException v2 - email duplicado. PRÉ-REQUISITO: Criar usuário primeiro com este email"
+							},
+							"response": []
+						},
+						{
+							"name": "POST - Criar usuário V2 (validação - campos inválidos)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"\",\n  \"email\": \"email-invalido\",\n  \"login\": \"\",\n  \"password\": \"123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/v2/users",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users"]
+								},
+								"description": "Testa MethodArgumentNotValidException v2 - múltiplos campos inválidos - deve retornar 400 com ProblemDetail"
+							},
+							"response": []
+						}
+					],
+					"description": "Cenários de erro para endpoints V2 - todos retornam ProblemDetail (RFC 7807)"
+				}
+			],
+			"description": "Endpoints V2 com autenticação JWT - Todos os erros retornam ProblemDetail (RFC 7807)"
 		}
 	],
 	"variable": [
@@ -987,6 +1305,11 @@
 		{
 			"key": "user_id",
 			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
 			"type": "string"
 		}
 	]

@@ -15,6 +15,8 @@ import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
@@ -46,7 +48,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ProblemDetail> handleUnauthorizedException(UnauthorizedException ex) {
+    public ResponseEntity<ProblemDetail> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
         log.error("Unauthorized access: {}", ex.getMessage());
         
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
@@ -55,6 +57,19 @@ public class GlobalExceptionHandler {
         );
         problemDetail.setType(URI.create(PROBLEM_TYPE_BASE_URI + "unauthorized"));
         problemDetail.setTitle("Unauthorized");
+        
+        // Set instance URI
+        if (request instanceof ServletWebRequest servletWebRequest) {
+            String requestURI = servletWebRequest.getRequest().getRequestURI();
+            problemDetail.setInstance(URI.create(servletWebRequest.getRequest().getRequestURL().toString()));
+            problemDetail.setProperty("path", requestURI);
+            problemDetail.setProperty("method", servletWebRequest.getRequest().getMethod());
+        } else {
+            String description = request.getDescription(false);
+            if (description.startsWith("uri=")) {
+                problemDetail.setInstance(URI.create(description.substring(4)));
+            }
+        }
         
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)

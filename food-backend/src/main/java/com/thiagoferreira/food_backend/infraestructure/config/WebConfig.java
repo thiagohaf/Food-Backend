@@ -25,7 +25,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
                         "/webjars/**",
-                        "/auth/login"
+                        "/auth/login",
+                        "/v2/**" // Endpoints v2 são gerenciados pelo Spring Security
                 );
     }
 }
