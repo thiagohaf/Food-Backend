@@ -19,13 +19,61 @@ public class OpenApiConfig {
     public OpenAPI springShopOpenAPI() {
         return new OpenAPI()
                 .info(new Info().title("Food API")
-                        .description("API RESTful for Food App - Sistema de gestão de restaurantes. " +
-                                "Esta API possui duas versões de autenticação: " +
-                                "V1 utiliza autenticação stateful baseada em HttpSession (endpoints /v1/** e /auth/**). " +
-                                "V2 utiliza autenticação baseada em JWT tokens (endpoints /v2/** e /v2/auth/**). " +
-                                "Para usar V1, faça login através do endpoint POST /auth/login. A sessão é mantida automaticamente através de cookies (JSESSIONID). " +
-                                "Para usar V2, faça login através do endpoint POST /v2/auth/login e use o token JWT retornado no header Authorization como 'Bearer {token}'. " +
-                                "Os endpoints POST /v1/users e POST /v2/users (cadastro de usuário) são públicos e não requerem autenticação.")
+                        .description("""
+                                # Food API
+                                
+                                API RESTful para o sistema de gestão de restaurantes Food App.
+                                
+                                ---
+                                
+                                ## 📋 Versões Disponíveis
+                                
+                                Esta API oferece duas versões distintas, cada uma com seu próprio método de autenticação:
+                                
+                                ### 🔐 Versão 1 (V1)
+                                
+                                **Endpoints:** `/v1/**` e `/auth/**`
+                                
+                                **Autenticação:** Stateful baseada em HttpSession
+                                
+                                **Como usar:**
+                                1. Faça login através do endpoint `POST /auth/login`
+                                2. A sessão é mantida automaticamente através de cookies (JSESSIONID)
+                                3. Não é necessário enviar tokens em requisições subsequentes
+                                
+                                ---
+                                
+                                ### 🔑 Versão 2 (V2) - Recomendada
+                                
+                                **Endpoints:** `/v2/**` e `/v2/auth/**`
+                                
+                                **Autenticação:** Stateless baseada em JWT (JSON Web Token)
+                                
+                                **Como usar:**
+                                1. Faça login através do endpoint `POST /v2/auth/login`
+                                2. Copie o token JWT retornado na resposta
+                                3. Inclua o token no header `Authorization` de todas as requisições:
+                                   ```
+                                   Authorization: Bearer {seu_token_aqui}
+                                   ```
+                                
+                                ---
+                                
+                                ## ⚠️ Observações Importantes
+                                
+                                - **Endpoints públicos:** Os endpoints `POST /v1/users` e `POST /v2/users` (cadastro de usuário) são públicos e **não requerem autenticação**
+                                - **Autenticação obrigatória:** Para acessar os demais endpoints protegidos, é necessário autenticar-se previamente
+                                - **Versão 2 (JWT):** Lembre-se de incluir o token Bearer no header `Authorization` em todas as requisições autenticadas
+                                
+                                ---
+                                
+                                ## 🚀 Primeiros Passos
+                                
+                                1. Cadastre um novo usuário através de `POST /v2/users` (público)
+                                2. Autentique-se via `POST /v2/auth/login` com suas credenciais
+                                3. Utilize o token JWT retornado para acessar os endpoints protegidos
+                                
+                                """)
                         .version("v2.0")
                         .license(new License()
                                 .name("MIT")
