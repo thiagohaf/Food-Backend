@@ -18,32 +18,41 @@ class OpenApiConfigTest {
     private OpenApiConfig openApiConfig;
 
     @Test
-    @DisplayName("Should create OpenAPI bean successfully")
+    @DisplayName("Should create OpenAPI bean with shared components successfully")
     void shouldCreateOpenApiBean() {
         // Act
         OpenAPI openAPI = openApiConfig.springShopOpenAPI();
 
         // Assert
         assertNotNull(openAPI);
-        assertNotNull(openAPI.getInfo());
-        assertEquals("Food API", openAPI.getInfo().getTitle());
-        assertEquals("v2.0", openAPI.getInfo().getVersion());
-        assertNotNull(openAPI.getInfo().getLicense());
-        assertEquals("MIT", openAPI.getInfo().getLicense().getName());
-        assertNotNull(openAPI.getInfo().getContact());
-        assertEquals("Thiago Ferreira", openAPI.getInfo().getContact().getName());
+        assertNotNull(openAPI.getComponents());
+        assertNotNull(openAPI.getComponents().getSecuritySchemes());
+        assertTrue(openAPI.getComponents().getSecuritySchemes().containsKey("bearerAuth"));
         assertNotNull(openAPI.getExternalDocs());
+        // Info should not be set in global bean, only in groups
+        assertNull(openAPI.getInfo());
     }
 
     @Test
-    @DisplayName("Should create GroupedOpenApi bean successfully")
-    void shouldCreateGroupedOpenApiBean() {
+    @DisplayName("Should create V1 GroupedOpenApi bean successfully")
+    void shouldCreateV1GroupedOpenApiBean() {
         // Act
-        GroupedOpenApi groupedOpenApi = openApiConfig.publicApi();
+        GroupedOpenApi v1GroupedOpenApi = openApiConfig.v1Api();
 
         // Assert
-        assertNotNull(groupedOpenApi);
-        assertEquals("v1", groupedOpenApi.getGroup());
+        assertNotNull(v1GroupedOpenApi);
+        assertEquals("v1", v1GroupedOpenApi.getGroup());
+    }
+
+    @Test
+    @DisplayName("Should create V2 GroupedOpenApi bean successfully")
+    void shouldCreateV2GroupedOpenApiBean() {
+        // Act
+        GroupedOpenApi v2GroupedOpenApi = openApiConfig.v2Api();
+
+        // Assert
+        assertNotNull(v2GroupedOpenApi);
+        assertEquals("v2", v2GroupedOpenApi.getGroup());
     }
 }
 
