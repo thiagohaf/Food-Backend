@@ -61,34 +61,47 @@ Os controllers são anotados com `@Tag` para organização no Swagger, e cada en
 
 A documentação da API versão 1 está organizada no Swagger UI, mostrando todos os endpoints disponíveis com autenticação baseada em sessão HTTP. As imagens abaixo mostram algumas das principais visualizações da documentação:
 
+#### Swagger V1 - Visão geral
 ![Swagger V1 - Visão geral](assets/swagger/v1/evidencia%201.png)
 
+#### Swagger V1 - Endpoints de usuários
 ![Swagger V1 - Endpoints de usuários](assets/swagger/v1/evidencia%202.png)
 
+#### Swagger V1 - Detalhes do endpoint de criação
 ![Swagger V1 - Detalhes do endpoint de criação](assets/swagger/v1/evidencia%203.png)
 
+#### Swagger V1 - Endpoints de autenticação
 ![Swagger V1 - Endpoints de autenticação](assets/swagger/v1/evidencia%204.png)
 
+#### Swagger V1 - Endpoints de busca
 ![Swagger V1 - Endpoints de busca](assets/swagger/v1/evidencia%205.png)
 
+#### Swagger V1 - Respostas de erro
 ![Swagger V1 - Respostas de erro](assets/swagger/v1/evidencia%206.png)
 
+#### Swagger V1 - Schema de resposta
 ![Swagger V1 - Schema de resposta](assets/swagger/v1/evidencia%207.png)
 
 ### Documentação Swagger - Versão 2
 
 A versão 2 da API utiliza autenticação JWT e está documentada separadamente no Swagger. As imagens abaixo ilustram a documentação dos endpoints V2, incluindo o recurso de autenticação Bearer Token:
 
+#### Swagger V2 - Visão geral
 ![Swagger V2 - Visão geral](assets/swagger/v2/evidencia%201.png)
 
+#### Swagger V2 - Autenticação JWT
 ![Swagger V2 - Autenticação JWT](assets/swagger/v2/evidencia%202.png)
 
-![Swagger V2 - Endpoints protegidos](assets/swagger/v2/evidencia%203.png)
+#### Swagger V2 - Autenticação JWT
+![Swagger V2 - Autenticação JWT](assets/swagger/v2/evidencia%203.png)
 
+#### Swagger V2 - Detalhes do endpoint
 ![Swagger V2 - Detalhes do endpoint](assets/swagger/v2/evidencia%204.png)
 
+#### Swagger V2 - Respostas de erro
 ![Swagger V2 - Respostas de erro](assets/swagger/v2/evidencia%205.png)
 
+#### Swagger V2 - Schemas
 ![Swagger V2 - Schemas](assets/swagger/v2/evidencia%206.png)
 
 Para validação sistemática dos cenários de borda, criei uma coleção completa do Postman (`Food_Backend_ProblemDetail_Tests.postman_collection.json`) que cobre diversos casos de teste, incluindo login inválido (retorna 404 com ProblemDetail), tentativa de cadastro com email duplicado (retorna 400 com ProblemDetail), requisições sem autenticação em endpoints protegidos (retorna 401), validações de campos obrigatórios, e fluxos completos de CRUD. A coleção utiliza variáveis de ambiente (`{{base_url}}`, `{{user_id}}`, `{{jwt_token}}`) para facilitar execução em diferentes ambientes.
@@ -157,9 +170,11 @@ O projeto foi containerizado utilizando Docker e Docker Compose para facilitar a
 
 Durante o desenvolvimento e testes, utilizei o Docker Desktop para gerenciar os containers e o IntelliJ IDEA para executar a aplicação quando necessário. As imagens abaixo mostram os containers em execução:
 
-![Docker - Containers em execução](assets/docker/evidencia 1.png)
+#### Docker - Containers em execução no Docker Desktop
+![Docker - Containers em execução](assets/docker/evidencia%201.png)
 
-![Docker - Detalhes dos containers](assets/docker/evidencia 2.png)
+#### Docker - Detalhes dos containers no IntelliJ IDEA
+![Docker - Detalhes dos containers](assets/docker/evidencia%202.png)
 
 ### Serviços Configurados
 
