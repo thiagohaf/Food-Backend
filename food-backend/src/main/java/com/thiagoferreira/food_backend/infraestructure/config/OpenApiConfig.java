@@ -55,9 +55,8 @@ public class OpenApiConfig {
         return openApi -> openApi.info(new Info()
                 .title("API Core - V1 (Legado)")
                 .description("""
-                        # API Core - V1 (Legado)
-                        
-                        API RESTful para o sistema de gestão de restaurantes Food App - Versão 1.
+                       
+                        # API RESTful para o sistema de gestão de restaurantes Food App - Versão 1.
                         
                         ---
                         
@@ -101,9 +100,8 @@ public class OpenApiConfig {
         return openApi -> openApi.info(new Info()
                 .title("API Core - V2")
                 .description("""
-                        # API Core - V2
                         
-                        API RESTful para o sistema de gestão de restaurantes Food App - Versão 2.
+                        # API RESTful para o sistema de gestão de restaurantes Food App - Versão 2.
                         
                         ---
                         

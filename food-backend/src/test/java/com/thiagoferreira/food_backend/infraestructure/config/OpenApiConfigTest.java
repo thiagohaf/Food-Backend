@@ -72,7 +72,7 @@ class OpenApiConfigTest {
         assertEquals("API Core - V1 (Legado)", openAPI.getInfo().getTitle());
         assertEquals("v1.0", openAPI.getInfo().getVersion());
         assertNotNull(openAPI.getInfo().getDescription());
-        assertTrue(openAPI.getInfo().getDescription().contains("API Core - V1 (Legado)"));
+        assertTrue(openAPI.getInfo().getDescription().contains("API RESTful para o sistema de gestão de restaurantes Food App - Versão 1"));
         assertTrue(openAPI.getInfo().getDescription().contains("HttpSession"));
         assertNotNull(openAPI.getInfo().getLicense());
         assertEquals("MIT", openAPI.getInfo().getLicense().getName());
@@ -95,7 +95,7 @@ class OpenApiConfigTest {
         assertEquals("API Core - V2", openAPI.getInfo().getTitle());
         assertEquals("v2.0", openAPI.getInfo().getVersion());
         assertNotNull(openAPI.getInfo().getDescription());
-        assertTrue(openAPI.getInfo().getDescription().contains("API Core - V2"));
+        assertTrue(openAPI.getInfo().getDescription().contains("API RESTful para o sistema de gestão de restaurantes Food App - Versão 2"));
         assertTrue(openAPI.getInfo().getDescription().contains("JWT"));
         assertNotNull(openAPI.getInfo().getLicense());
         assertEquals("MIT", openAPI.getInfo().getLicense().getName());

@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,9 +59,8 @@ public class AuthControllerV2 {
     @PostMapping("/logout")
     @Operation(
             summary = "Logout user",
-            description = "Invalidates the current JWT token. The client should discard the token after calling this endpoint. " +
-                    "Note: Since JWT tokens are stateless, they remain valid until expiration. This endpoint serves as a signal " +
-                    "to the client to discard the token. In production, you may want to implement a token blacklist. " +
+            description = "Signals the client to discard the JWT token. Since JWT tokens are stateless, they remain valid until expiration. " +
+                    "The client should discard the token after calling this endpoint. " +
                     "This endpoint requires authentication (valid JWT token)."
     )
     @SecurityRequirement(name = "bearerAuth")
@@ -75,10 +73,7 @@ public class AuthControllerV2 {
                     content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
     })
     public ResponseEntity<Void> logout() {
-        // JWT tokens are stateless, so we just return 200 OK
-        // The client is responsible for discarding the token
-        // In production, you might want to implement a token blacklist
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
     }
 }
 
