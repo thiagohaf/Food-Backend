@@ -218,6 +218,7 @@ A documentação completa da API está disponível através do **Swagger UI** qu
 | Método | Endpoint | Descrição | Autenticação |
 |--------|----------|-----------|--------------|
 | POST | `/v2/auth/login` | Autenticar usuário e obter JWT token | Não requerida |
+| POST | `/v2/auth/logout` | Logout do usuário (descartar token) | Requerida (JWT) |
 
 **Login Request:**
 ```json
@@ -360,6 +361,7 @@ A versão 2 dos endpoints implementa autenticação **stateless** baseada em **J
 3. **Token JWT**: Se válido, retorna um token JWT no formato `{"token": "...", "type": "Bearer"}`
 4. **Acesso**: Endpoints protegidos requerem o header `Authorization: Bearer {token}`
 5. **Validação**: O Spring Security valida o token JWT automaticamente
+6. **Logout**: O usuário pode fazer logout através de `POST /v2/auth/logout`. Como JWT é stateless, o cliente deve descartar o token após o logout
 
 #### Endpoints Públicos V2
 
@@ -385,6 +387,7 @@ Todos os demais endpoints `/v2/**` requerem autenticação via JWT. Se uma requi
 | Método | Endpoint | Descrição | Autenticação |
 |--------|----------|-----------|--------------|
 | POST | `/v2/auth/login` | Login e obtenção de JWT token | Não requerida |
+| POST | `/v2/auth/logout` | Logout do usuário (descartar token) | Requerida (JWT) |
 | POST | `/v2/users` | Criar novo usuário | Não requerida (público) |
 | GET | `/v2/users` | Listar todos os usuários | Requerida (JWT) |
 | GET | `/v2/users/{id}` | Buscar usuário por ID | Requerida (JWT) |
@@ -425,6 +428,11 @@ POST /v2/auth/login
 GET /v2/users
 Headers: Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 # Resposta: 200 OK com lista de usuários
+
+# 4. Logout (descartar token)
+POST /v2/auth/logout
+Headers: Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Resposta: 200 OK (cliente deve descartar o token)
 ```
 
 #### Configuração JWT

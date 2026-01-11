@@ -1158,6 +1158,7 @@ A API agora possui uma versão 2 dos endpoints que utiliza autenticação basead
 ### Endpoints V2
 
 - `POST /v2/auth/login` - Login e obtenção de JWT token (público)
+- `POST /v2/auth/logout` - Logout do usuário (requer JWT)
 - `POST /v2/users` - Criar usuário (público)
 - `GET /v2/users` - Listar usuários (requer JWT)
 - `GET /v2/users/{id}` - Buscar usuário por ID (requer JWT)
@@ -1173,6 +1174,7 @@ A API agora possui uma versão 2 dos endpoints que utiliza autenticação basead
 1. **Fazer Login V2**: Execute `POST /v2/auth/login` com login e senha
 2. **Obter Token**: A resposta contém um objeto `{"token": "...", "type": "Bearer"}`
 3. **Usar Token**: Adicione o header `Authorization: Bearer {token}` em todas as requisições protegidas
+4. **Logout**: Execute `POST /v2/auth/logout` com o token para fazer logout (o cliente deve descartar o token)
 
 **Nota**: A collection do Postman possui um script que salva automaticamente o token na variável `jwt_token` após o login bem-sucedido.
 
@@ -1295,7 +1297,38 @@ A API agora possui uma versão 2 dos endpoints que utiliza autenticação basead
 }
 ```
 
-### 6.6. Erros V2 (ProblemDetail)
+### 6.6. Logout V2 (com JWT)
+
+**Pré-requisito:** Fazer login v2 primeiro (ver seção 6.1)
+
+**Método:** `POST`  
+**URL:** `http://localhost:8080/v2/auth/logout`  
+**Headers:** `Authorization: Bearer {{jwt_token}}`
+
+**Resposta Esperada (200):**
+```
+Status: 200 OK
+(Cliente deve descartar o token após o logout)
+```
+
+**Nota:** Como JWT tokens são stateless, o token permanece válido até expirar. O endpoint de logout serve como sinal para o cliente descartar o token. Em produção, você pode querer implementar uma blacklist de tokens.
+
+### 6.7. Logout V2 (sem token - erro 401)
+
+**Método:** `POST`  
+**URL:** `http://localhost:8080/v2/auth/logout`
+
+**Resposta Esperada (401):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/unauthorized",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Authentication required. Please provide a valid JWT token in the Authorization header."
+}
+```
+
+### 6.8. Erros V2 (ProblemDetail)
 
 Todos os erros nos endpoints v2 retornam **ProblemDetail (RFC 7807)**, incluindo:
 - **401 Unauthorized**: Token ausente ou inválido
@@ -1401,6 +1434,8 @@ Use esta checklist para garantir que testou todos os cenários:
   - [ ] Login V2 (senha incorreta - 404)
   - [ ] Acesso não autorizado V2 (sem token - 401)
   - [ ] Acesso não autorizado V2 (token inválido - 401)
+  - [ ] Logout V2 (sucesso - com token válido)
+  - [ ] Logout V2 (sem token - 401)
   - [ ] Criar usuário V2 (público)
   - [ ] Listar usuários V2 (com JWT)
   - [ ] Buscar usuário por ID V2 (com JWT)

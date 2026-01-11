@@ -90,4 +90,15 @@ class AuthControllerV2Test {
         verify(userService, times(1)).authenticate("testuser", "password123");
         verify(jwtService, never()).generateToken(anyString(), any());
     }
+
+    @Test
+    @DisplayName("Should logout successfully")
+    void shouldLogoutSuccessfully() {
+        // Act
+        ResponseEntity<Void> response = authControllerV2.logout();
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNull(response.getBody());
+    }
 }

@@ -1098,6 +1098,39 @@
 								"description": "Testa acesso a endpoint v2 protegido com token JWT inválido - deve retornar 401 com ProblemDetail"
 							},
 							"response": []
+						},
+						{
+							"name": "POST - Logout V2 (sucesso)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/v2/auth/logout",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "auth", "logout"]
+								},
+								"description": "Faz logout do usuário. O cliente deve descartar o token após o logout. Como JWT é stateless, o token permanece válido até expirar. PRÉ-REQUISITO: Fazer login v2 primeiro para obter o token"
+							},
+							"response": []
+						},
+						{
+							"name": "POST - Logout V2 (sem token - erro 401)",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/v2/auth/logout",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "auth", "logout"]
+								},
+								"description": "Testa logout v2 sem token JWT - deve retornar 401 com ProblemDetail"
+							},
+							"response": []
 						}
 					],
 					"description": "Endpoints e testes relacionados à autenticação V2 com JWT"
