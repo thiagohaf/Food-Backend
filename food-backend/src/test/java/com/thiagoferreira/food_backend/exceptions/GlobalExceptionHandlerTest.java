@@ -107,6 +107,29 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("Should handle UnauthorizedException when description does not start with uri=")
+    void shouldHandleUnauthorizedExceptionWhenDescriptionDoesNotStartWithUri() {
+        // Arrange
+        UnauthorizedException ex = new UnauthorizedException(
+                com.thiagoferreira.food_backend.domain.enums.ErrorMessages.UNAUTHORIZED_ACCESS
+        );
+        
+        WebRequest request = mock(WebRequest.class);
+        when(request.getDescription(false)).thenReturn("invalid description format");
+
+        // Act
+        ResponseEntity<ProblemDetail> response = exceptionHandler.handleUnauthorizedException(ex, request);
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Unauthorized", response.getBody().getTitle());
+        assertTrue(response.getBody().getType().toString().contains("unauthorized"));
+        // Instance should not be set when description doesn't start with "uri="
+        assertNull(response.getBody().getInstance());
+    }
+
+    @Test
     @DisplayName("Should handle DomainValidationException")
     void shouldHandleDomainValidationException() {
         // Arrange

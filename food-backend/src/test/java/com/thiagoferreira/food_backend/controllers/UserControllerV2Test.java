@@ -215,6 +215,22 @@ class UserControllerV2Test {
     }
 
     @Test
+    @DisplayName("Should throw ResourceNotFoundException when user not found by email")
+    void shouldThrowExceptionWhenUserNotFoundByEmail() {
+        // Arrange
+        when(userService.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> userControllerV2.searchByEmail("nonexistent@example.com")
+        );
+        assertEquals(ErrorMessages.USER_NOT_FOUND.getMessage(), exception.getMessage());
+        verify(userService, times(1)).findByEmail("nonexistent@example.com");
+        verify(userMapper, never()).toResponse(any(User.class));
+    }
+
+    @Test
     @DisplayName("Should search user by id successfully")
     void shouldSearchUserByIdSuccessfully() {
         // Arrange

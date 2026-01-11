@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,6 +55,52 @@ class OpenApiConfigTest {
         // Assert
         assertNotNull(v2GroupedOpenApi);
         assertEquals("v2", v2GroupedOpenApi.getGroup());
+    }
+
+    @Test
+    @DisplayName("Should apply V1 API customizer successfully")
+    void shouldApplyV1ApiCustomizerSuccessfully() {
+        // Arrange
+        OpenAPI openAPI = new OpenAPI();
+        OpenApiCustomizer customizer = (OpenApiCustomizer) ReflectionTestUtils.invokeMethod(openApiConfig, "v1ApiCustomizer");
+
+        // Act
+        customizer.customise(openAPI);
+
+        // Assert
+        assertNotNull(openAPI.getInfo());
+        assertEquals("API Core - V1 (Legado)", openAPI.getInfo().getTitle());
+        assertEquals("v1.0", openAPI.getInfo().getVersion());
+        assertNotNull(openAPI.getInfo().getDescription());
+        assertTrue(openAPI.getInfo().getDescription().contains("API Core - V1 (Legado)"));
+        assertTrue(openAPI.getInfo().getDescription().contains("HttpSession"));
+        assertNotNull(openAPI.getInfo().getLicense());
+        assertEquals("MIT", openAPI.getInfo().getLicense().getName());
+        assertNotNull(openAPI.getInfo().getContact());
+        assertEquals("Thiago Ferreira", openAPI.getInfo().getContact().getName());
+    }
+
+    @Test
+    @DisplayName("Should apply V2 API customizer successfully")
+    void shouldApplyV2ApiCustomizerSuccessfully() {
+        // Arrange
+        OpenAPI openAPI = new OpenAPI();
+        OpenApiCustomizer customizer = (OpenApiCustomizer) ReflectionTestUtils.invokeMethod(openApiConfig, "v2ApiCustomizer");
+
+        // Act
+        customizer.customise(openAPI);
+
+        // Assert
+        assertNotNull(openAPI.getInfo());
+        assertEquals("API Core - V2", openAPI.getInfo().getTitle());
+        assertEquals("v2.0", openAPI.getInfo().getVersion());
+        assertNotNull(openAPI.getInfo().getDescription());
+        assertTrue(openAPI.getInfo().getDescription().contains("API Core - V2"));
+        assertTrue(openAPI.getInfo().getDescription().contains("JWT"));
+        assertNotNull(openAPI.getInfo().getLicense());
+        assertEquals("MIT", openAPI.getInfo().getLicense().getName());
+        assertNotNull(openAPI.getInfo().getContact());
+        assertEquals("Thiago Ferreira", openAPI.getInfo().getContact().getName());
     }
 }
 
