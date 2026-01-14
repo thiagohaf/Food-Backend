@@ -11,7 +11,44 @@
 
 ## 1. Visão Geral e Arquitetura
 
-Decidi construir o projeto sobre o ecossistema Spring Boot 4.0.1 utilizando Java 21, uma escolha que considero adequada para criar uma base sólida capaz de suportar as operações críticas de um sistema de gestão de restaurantes. O Spring Boot facilita muito o desenvolvimento através da automação de configuração e gestão de dependências, o que reduz significativamente o tempo de desenvolvimento e minimiza erros de configuração.
+### Tecnologias Utilizadas
+
+O projeto foi desenvolvido utilizando um conjunto moderno de tecnologias Java que garantem robustez, segurança e facilidade de manutenção. A seleção das tecnologias priorizou frameworks maduros e amplamente adotados no ecossistema Spring, permitindo aproveitar toda a comunidade e documentação disponível.
+
+**Framework e Core:**
+- **Spring Boot 4.0.1**: Framework principal escolhido por sua capacidade de reduzir significativamente a configuração inicial através de convenções sensatas e autoconfiguração. O Spring Boot facilita muito o desenvolvimento através da automação de configuração e gestão de dependências, o que reduz significativamente o tempo de desenvolvimento e minimiza erros de configuração.
+- **Java 21**: Linguagem de programação utilizada, escolhida por ser uma versão LTS (Long Term Support) que oferece recursos modernos como Records, Pattern Matching e melhorias de performance.
+- **Maven**: Gerenciador de dependências e ferramenta de build utilizada. O projeto inclui Maven Wrapper (`mvnw`) para garantir consistência entre diferentes ambientes de desenvolvimento.
+
+**Persistência de Dados:**
+- **Spring Data JPA**: Camada de persistência que abstrai o acesso a dados através de interfaces Repository, reduzindo código boilerplate e simplificando operações CRUD.
+- **PostgreSQL 16**: Banco de dados relacional escolhido por sua robustez, conformidade com SQL, suporte a ACID e performance. A escolha por PostgreSQL permite garantir integridade referencial e transações críticas para operações como criação de usuário e alteração de senha.
+- **Hibernate**: ORM (Object-Relational Mapping) utilizado pelo Spring Data JPA, que mapeia entidades Java para tabelas do banco de dados e gerencia o ciclo de vida das entidades.
+
+**Validação e Documentação:**
+- **Bean Validation (JSR 303/380)**: Especificação Java para validação de dados através de anotações, integrada ao Spring Boot Starter Validation. Utilizada para validações de entrada nos DTOs.
+- **SpringDoc OpenAPI 3 (v2.7.0)**: Biblioteca utilizada para gerar documentação automática da API em formato OpenAPI 3.0, disponibilizando interface Swagger UI interativa.
+- **Swagger Annotations (v2.2.22)**: Anotações para enriquecer a documentação da API com descrições detalhadas, exemplos e esquemas de resposta.
+
+**Segurança:**
+- **jBCrypt (v0.4)**: Biblioteca para hashing de senhas utilizando o algoritmo BCrypt, que gera salt automático para cada senha, aumentando a segurança contra ataques de força bruta.
+- **HttpSession**: Mecanismo de sessão HTTP utilizado na versão 1 (V1) para autenticação stateful baseada em sessão.
+- **Spring Security**: Framework de segurança do ecossistema Spring utilizado na versão 2 (V2) para gerenciar autenticação e autorização.
+- **JWT (JSON Web Tokens) - jjwt (v0.12.5)**: Biblioteca utilizada para implementar autenticação stateless através de tokens JWT na versão 2 (V2). A versão 0.12.5 foi escolhida por ser compatível com Java 21 e Spring Boot 4.0.1.
+
+**Utilitários:**
+- **Lombok**: Biblioteca que reduz código boilerplate através de anotações processadas em tempo de compilação (ex: `@RequiredArgsConstructor`, `@Getter`, `@Setter`), mantendo o código mais limpo e legível.
+
+**Testes e Qualidade:**
+- **JUnit 5**: Framework de testes padrão da plataforma Java, incluído no Spring Boot Starter Test. Utilizado para escrever testes unitários e de integração.
+- **JaCoCo (v0.8.11)**: Ferramenta de análise de cobertura de código que instrumenta o código durante a execução dos testes e gera relatórios detalhados. Configurado com meta mínima de 80% de cobertura de linhas.
+- **Maven Surefire Plugin**: Plugin Maven que executa testes durante o build, integrado com o JaCoCo para coletar dados de cobertura.
+
+**Containerização:**
+- **Docker**: Tecnologia de containerização utilizada para empacotar a aplicação e suas dependências em uma imagem isolada.
+- **Docker Compose**: Ferramenta para orquestrar múltiplos containers (aplicação Spring Boot e PostgreSQL), facilitando a execução local e garantindo consistência entre ambientes.
+
+A escolha dessas tecnologias modernas como Spring Boot 4.0.1, Java 21, PostgreSQL e Docker garante que a aplicação esteja preparada para escalabilidade e manutenção futura, aproveitando as melhores práticas e padrões estabelecidos na comunidade Java.
 
 A arquitetura adotada segue um padrão em camadas (Layered Architecture) com separação clara de responsabilidades. Optei por isolar as regras de negócio na camada de serviços (`UserService`), evitando que os controllers (`UserController`, `UserControllerV2`) fiquem poluídos com lógica de domínio. Os controllers focam exclusivamente em receber requisições HTTP, delegar processamento aos services e formatar respostas.
 
@@ -20,6 +57,89 @@ Entre a camada de apresentação e a de domínio, implementei uma camada de DTOs
 Para padronização de respostas de erro, implementei o tratamento de exceções através do `GlobalExceptionHandler`, que converte todas as exceções em objetos `ProblemDetail` conforme o RFC 7807. Isso garante que qualquer erro retornado pela API siga um formato consistente com os campos `type`, `title`, `status`, `detail` e propriedades customizadas. Exceções de domínio como `DomainValidationException` e `ResourceNotFoundException` são capturadas e transformadas em respostas HTTP apropriadas.
 
 A aplicação suporta duas versões de autenticação coexistentes. A versão 1 (V1) utiliza autenticação stateful baseada em `HttpSession`, implementada manualmente através do `AuthInterceptor` que intercepta requisições e verifica a existência de sessão válida. A versão 2 (V2) migra para autenticação stateless usando JWT (JSON Web Tokens) gerenciada pelo Spring Security através da classe `SecurityConfig` e do filtro `JwtAuthenticationFilter`. Essa coexistência permite migração gradual sem impactar clientes existentes.
+
+### Estrutura do Projeto
+
+A organização do código segue uma estrutura modular que reflete a arquitetura em camadas adotada. O projeto está organizado no diretório `food-backend/` e segue o padrão Maven de estrutura de diretórios. A seguir, apresento a estrutura completa do projeto:
+
+```
+food-backend/
+├── src/
+│   ├── main/
+│   │   ├── java/com/thiagoferreira/food_backend/
+│   │   │   ├── Application.java                    # Classe principal da aplicação
+│   │   │   ├── controllers/                        # Controladores REST
+│   │   │   │   ├── AuthController.java             # Autenticação V1 (HttpSession)
+│   │   │   │   ├── AuthControllerV2.java           # Autenticação V2 (JWT)
+│   │   │   │   ├── UserController.java             # Gerenciamento de usuários V1
+│   │   │   │   └── UserControllerV2.java           # Gerenciamento de usuários V2
+│   │   │   ├── interceptors/                       # Interceptadores HTTP
+│   │   │   │   └── AuthInterceptor.java            # Interceptor de autenticação V1
+│   │   │   ├── domain/
+│   │   │   │   ├── dto/                            # Data Transfer Objects
+│   │   │   │   │   ├── AddressDTO.java
+│   │   │   │   │   ├── LoginRequest.java
+│   │   │   │   │   ├── PasswordChangeRequest.java
+│   │   │   │   │   ├── ProblemDetailDTO.java
+│   │   │   │   │   ├── TokenResponse.java
+│   │   │   │   │   ├── UserRequest.java
+│   │   │   │   │   ├── UserResponse.java
+│   │   │   │   │   └── UserUpdateRequest.java
+│   │   │   │   ├── entities/                       # Entidades JPA
+│   │   │   │   │   ├── Address.java
+│   │   │   │   │   └── User.java
+│   │   │   │   └── enums/                          # Enumeradores
+│   │   │   │       ├── ErrorMessages.java
+│   │   │   │       └── UserType.java
+│   │   │   ├── exceptions/                         # Tratamento de exceções
+│   │   │   │   ├── DomainValidationException.java
+│   │   │   │   ├── GlobalExceptionHandler.java
+│   │   │   │   ├── ResourceNotFoundException.java
+│   │   │   │   └── UnauthorizedException.java
+│   │   │   ├── infraestructure/
+│   │   │   │   ├── config/                         # Configurações
+│   │   │   │   │   ├── OpenApiConfig.java          # Configuração do Swagger/OpenAPI
+│   │   │   │   │   └── WebConfig.java              # Configuração web (interceptors)
+│   │   │   │   ├── repositories/                   # Repositórios JPA
+│   │   │   │   │   └── UserRepository.java
+│   │   │   │   └── security/                       # Configurações de segurança V2
+│   │   │   │       ├── JwtAuthenticationFilter.java
+│   │   │   │       ├── JwtService.java
+│   │   │   │       ├── SecurityConfig.java
+│   │   │   │       ├── SecurityProblemDetailAccessDeniedHandler.java
+│   │   │   │       ├── SecurityProblemDetailEntryPoint.java
+│   │   │   │       └── UserDetailsServiceImpl.java
+│   │   │   ├── mappers/                            # Mappers DTO/Entity
+│   │   │   │   └── UserMapper.java
+│   │   │   └── services/                           # Lógica de negócio
+│   │   │       └── UserService.java
+│   │   └── resources/
+│   │       └── application.properties               # Configurações da aplicação
+│   └── test/                                       # Testes automatizados
+│       └── java/com/thiagoferreira/food_backend/
+│           ├── controllers/
+│           ├── exceptions/
+│           ├── infraestructure/
+│           ├── interceptors/
+│           ├── mappers/
+│           └── services/
+├── docker-compose.yml                              # Configuração Docker Compose
+├── Dockerfile                                      # Imagem Docker
+├── pom.xml                                         # Configuração Maven
+└── README.md                                       # Documentação do projeto
+```
+
+Esta estrutura organiza o código seguindo os princípios de separação de responsabilidades e modularidade:
+
+- **`controllers/`**: Contém os controladores REST separados por versão (V1 e V2), cada um implementando seus respectivos endpoints e tipos de autenticação
+- **`domain/`**: Agrupa as classes de domínio em subpacotes (`dto`, `entities`, `enums`), mantendo as entidades JPA separadas dos DTOs que expõem a API
+- **`services/`**: Contém a lógica de negócio isolada dos controllers, facilitando reutilização e testes
+- **`infraestructure/`**: Separa aspectos técnicos da infraestrutura (`config`, `repositories`, `security`) das regras de negócio, seguindo o princípio de Inversão de Dependências
+- **`exceptions/`**: Centraliza o tratamento de exceções e define exceções customizadas de domínio
+- **`mappers/`**: Centraliza a lógica de transformação entre DTOs e entidades, evitando acoplamento
+- **`interceptors/`**: Contém interceptadores HTTP específicos para a autenticação V1
+
+A separação entre V1 e V2 está presente principalmente nos controllers, mantendo o restante do código (services, repositories, entities) compartilhado entre as duas versões. Isso demonstra que a coexistência de duas versões de autenticação não resultou em duplicação de código de negócio, apenas na camada de apresentação.
 
 ## 2. Modelagem de Dados e Entidades
 
@@ -35,6 +155,8 @@ Escolhemos PostgreSQL como banco de dados relacional porque o modelo de dados é
 
 Durante o desenvolvimento, utilizei o DBeaver para visualizar e validar a estrutura do banco de dados PostgreSQL. A figura abaixo mostra a estrutura da tabela `tb_users` criada pelo Hibernate, onde podemos observar todos os campos da entidade `User`, incluindo os campos de endereço incorporados e os campos de auditoria (`created_at` e `last_updated`).
 
+
+#### Estrutura do Banco de Dados PostgreSQL - DBeaver
 ![Estrutura do Banco de Dados PostgreSQL - DBeaver](assets/dbeaver/postgres.png)
 
 ## 3. API e Endpoints
@@ -162,9 +284,71 @@ A versão 2 utiliza autenticação JWT, e os testes validam o fluxo completo:
 #### Acesso não autorizado V2 sem token
 ![Postman - Acesso não autorizado V2 sem token](assets/postman/6-Endpoints%20V2%20-%20JWT%20Authentication/6.1-Autentica%C3%A7%C3%A3o%20V2/GET%20-%20Acesso%20n%C3%A3o%20autorizado%20V2%20%28sem%20token%29.png)
 
-A aplicação possui cobertura de testes automatizados configurada através do JaCoCo com meta mínima de 80% de cobertura de linhas. Os testes estão organizados no pacote `src/test/java` e incluem testes unitários para services (`UserService`), controllers (`UserControllerV2Test`, `AuthControllerV2Test`), mappers (`UserMapper`), interceptors (`AuthInterceptorTest`), e configurações (`OpenApiConfigTest`). O Maven Surefire Plugin executa os testes durante o build, e o JaCoCo gera relatórios em `target/site/jacoco/` que podem ser verificados para garantir a manutenção da qualidade do código.
+### Testes Automatizados e Cobertura de Código (JaCoCo)
 
-## 5. Guia de Infraestrutura (Docker)
+A aplicação possui uma suíte completa de testes automatizados organizados no pacote `src/test/java` seguindo a estrutura do código de produção. Os testes incluem testes unitários para services (`UserService`), controllers (`UserControllerV2Test`, `AuthControllerV2Test`), mappers (`UserMapper`), interceptors (`AuthInterceptorTest`), configurações (`OpenApiConfigTest`), filtros de segurança (`JwtAuthenticationFilterTest`) e handlers de exceção (`GlobalExceptionHandlerTest`). O Maven Surefire Plugin executa os testes durante o build, garantindo que todas as alterações no código sejam validadas automaticamente.
+
+Para garantir a qualidade do código e identificar áreas não testadas, implementei a análise de cobertura de código utilizando o **JaCoCo (Java Code Coverage)** versão 0.8.11. O JaCoCo é configurado através do plugin Maven `jacoco-maven-plugin` no `pom.xml` com três execuções principais:
+
+**1. Prepare Agent (`prepare-agent`):**
+- Configurado para instrumentar as classes durante a execução dos testes
+- Exclui classes do sistema (`sun/**`, `jdk/**`, `java/**`, `com/sun/**`) e a classe principal da aplicação (`Application.class`) da análise de cobertura, focando apenas no código de negócio
+
+**2. Report (`report`):**
+- Executado na fase `test` do Maven
+- Gera relatórios HTML detalhados em `target/site/jacoco/` com métricas de cobertura por classe, método e linha
+- Os relatórios incluem informações sobre instruções, branches, linhas, métodos e classes cobertas
+
+**3. Check (`jacoco-check`):**
+- Valida se a cobertura de código atende aos critérios mínimos estabelecidos
+- Configurado com meta mínima de **80% de cobertura de linhas** (`COVEREDRATIO` de 0.80) para o bundle completo
+- O build falha se a cobertura ficar abaixo do mínimo, garantindo que novos códigos mantenham ou melhorem a qualidade
+
+Durante o desenvolvimento, executei os testes e gerei os relatórios de cobertura para validar que todas as funcionalidades críticas estão adequadamente testadas. A figura abaixo mostra o relatório de cobertura do JaCoCo, onde podemos observar a cobertura geral do projeto e os detalhes por pacote e classe.
+
+#### Relatório de Cobertura JaCoCo
+![Relatório de Cobertura JaCoCo](assets/jacoco/cobertura.png)
+
+A integração do JaCoCo com o ciclo de build garante que a qualidade do código seja mantida continuamente. Toda vez que os testes são executados através de `mvn test` ou `mvn clean package`, o JaCoCo coleta dados de cobertura, gera relatórios e valida se os critérios mínimos são atendidos. Isso permite identificar rapidamente áreas do código que precisam de testes adicionais e ajuda a manter a confiabilidade do sistema durante evoluções futuras.
+
+A suíte de testes implementada abrange diferentes tipos de testes para garantir a qualidade em múltiplas camadas:
+
+- **Testes unitários**: Testes isolados de componentes individuais como services, mappers e utilitários, utilizando mocks para isolar dependências
+- **Testes de integração**: Testes que utilizam o contexto completo do Spring Boot (`@SpringBootTest`) para validar interações entre componentes
+- **Testes de controladores**: Testes focados nos endpoints REST utilizando `MockMvc` para simular requisições HTTP e validar respostas, códigos de status e estrutura de dados
+- **Testes de serviços**: Testes da lógica de negócio isolada, validando regras de domínio e transformações de dados
+- **Testes de exceções**: Testes específicos para o tratamento de erros, garantindo que exceções são capturadas corretamente pelo `GlobalExceptionHandler` e convertidas em respostas `ProblemDetail` apropriadas
+
+## 5. Validações Implementadas
+
+A aplicação implementa um sistema abrangente de validações em múltiplas camadas para garantir a integridade e consistência dos dados. As validações são aplicadas tanto no nível de entrada (DTOs) quanto no nível de negócio (services), criando uma defesa em profundidade contra dados inválidos.
+
+### Validações de Entrada (Bean Validation)
+
+As validações de entrada são implementadas utilizando Bean Validation (JSR 303/380) através de anotações nos DTOs. O Spring Boot Starter Validation ativa automaticamente a validação e o `GlobalExceptionHandler` captura `MethodArgumentNotValidException`, convertendo-as em respostas `ProblemDetail` com detalhamento dos erros.
+
+**Validações implementadas nos DTOs:**
+
+- **Email**: Formato válido de email através de `@Email` e `@NotBlank`, garantindo que apenas endereços de email válidos sejam aceitos
+- **Password**: Mínimo de 6 caracteres através de `@Size(min = 6)`, assegurando senhas com complexidade mínima
+- **Campos obrigatórios**: Name, Email, Login, Password e UserType são marcados como `@NotBlank` ou `@NotNull`, garantindo que dados essenciais estejam presentes
+- **Tipos de dados**: Validações de tipo garantem que os dados recebidos correspondem aos tipos esperados (String, Enum, etc.)
+
+Essas validações são executadas automaticamente pelo Spring antes que a requisição chegue ao controller, retornando `400 Bad Request` com detalhes dos campos inválidos caso algum dado não atenda aos critérios.
+
+### Validações de Domínio (Business Rules)
+
+Além das validações de entrada, a aplicação implementa validações de negócio na camada de serviços, que garantem regras de domínio mais complexas:
+
+- **Unicidade de Email**: O `UserService.createUser()` verifica através de `UserRepository.existsByEmail()` se o email já está cadastrado antes de criar um novo usuário. Se duplicado, lança `DomainValidationException` com status 400
+- **Unicidade de Login**: Similarmente, o login é verificado através de `UserRepository.existsByLogin()` para garantir que cada usuário tenha um identificador único
+- **Validação de Senha na Alteração**: O método `UserService.changePassword()` valida que a senha atual fornecida corresponde à senha armazenada usando `BCrypt.checkpw()` antes de aplicar a nova senha. Também verifica que a senha atual e nova senha sejam diferentes, lançando `DomainValidationException` se forem iguais
+- **Existência de Recurso**: Operações de atualização, exclusão e busca por ID verificam a existência do usuário através de `UserRepository.findById()` antes de proceder, lançando `ResourceNotFoundException` (404) se o recurso não existir
+- **Autenticação de Senha**: No login, a senha fornecida é verificada contra o hash armazenado usando BCrypt, garantindo que apenas usuários com credenciais corretas possam autenticar
+
+Essas validações de domínio são críticas para manter a integridade dos dados e garantir que operações sensíveis (como alteração de senha) sejam realizadas apenas quando todas as condições de negócio são atendidas. A separação entre validações de entrada (formato e estrutura) e validações de domínio (regras de negócio) segue boas práticas de arquitetura, permitindo que cada camada tenha responsabilidades bem definidas.
+
+## 6. Guia de Infraestrutura (Docker)
 
 O projeto foi containerizado utilizando Docker e Docker Compose para facilitar a execução local e garantir consistência entre ambientes de desenvolvimento. O `docker-compose.yml` define dois serviços que trabalham em conjunto.
 
@@ -294,8 +478,8 @@ docker-compose up --build
 
 ## Considerações Finais
 
-Este relatório técnico documenta o desenvolvimento do sistema de gestão de restaurantes, desde a arquitetura e modelagem de dados até a infraestrutura Docker. O projeto demonstra a aplicação de conceitos importantes como separação de responsabilidades, tratamento padronizado de erros, documentação automática de APIs e containerização.
+Este relatório técnico documenta o desenvolvimento do sistema de gestão de restaurantes, desde a arquitetura e modelagem de dados até a infraestrutura Docker. O projeto demonstra a aplicação de conceitos importantes como separação de responsabilidades, tratamento padronizado de erros, documentação automática de APIs, validações em múltiplas camadas e containerização.
 
-A escolha de tecnologias modernas como Spring Boot 4.0.1, Java 21, PostgreSQL e Docker garante que a aplicação esteja preparada para escalabilidade e manutenção futura. A coexistência de duas versões da API (V1 com sessão HTTP e V2 com JWT) permite migração gradual sem impactar clientes existentes.
+A escolha de tecnologias modernas como Spring Boot 4.0.1, Java 21, PostgreSQL e Docker garante que a aplicação esteja preparada para escalabilidade e manutenção futura. A coexistência de duas versões da API (V1 com sessão HTTP e V2 com JWT) permite migração gradual sem impactar clientes existentes. O sistema abrangente de validações implementado (Bean Validation e regras de domínio) garante a integridade dos dados em todas as camadas da aplicação.
 
 Todos os códigos-fonte, documentação adicional e coleções de testes estão disponíveis no repositório público do GitHub: [https://github.com/thiagohaf/Food-Backend](https://github.com/thiagohaf/Food-Backend)
