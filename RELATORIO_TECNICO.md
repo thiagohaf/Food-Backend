@@ -184,47 +184,47 @@ Os controllers são anotados com `@Tag` para organização no Swagger, e cada en
 A documentação da API versão 1 está organizada no Swagger UI, mostrando todos os endpoints disponíveis com autenticação baseada em sessão HTTP. As imagens abaixo mostram algumas das principais visualizações da documentação:
 
 #### Swagger V1 - Visão geral
-![Swagger V1 - Visão geral](assets/swagger/v1/evidencia%201.png)
+![Swagger V1 - Visão geral](assets/swagger/v1/evidencia_1.png)
 
 #### Swagger V1 - Endpoints de usuários
-![Swagger V1 - Endpoints de usuários](assets/swagger/v1/evidencia%202.png)
+![Swagger V1 - Endpoints de usuários](assets/swagger/v1/evidencia_2.png)
 
 #### Swagger V1 - Detalhes do endpoint de criação
-![Swagger V1 - Detalhes do endpoint de criação](assets/swagger/v1/evidencia%203.png)
+![Swagger V1 - Detalhes do endpoint de criação](assets/swagger/v1/evidencia_3.png)
 
 #### Swagger V1 - Endpoints de autenticação
-![Swagger V1 - Endpoints de autenticação](assets/swagger/v1/evidencia%204.png)
+![Swagger V1 - Endpoints de autenticação](assets/swagger/v1/evidencia_4.png)
 
 #### Swagger V1 - Endpoints de busca
-![Swagger V1 - Endpoints de busca](assets/swagger/v1/evidencia%205.png)
+![Swagger V1 - Endpoints de busca](assets/swagger/v1/evidencia_5.png)
 
 #### Swagger V1 - Respostas de erro
-![Swagger V1 - Respostas de erro](assets/swagger/v1/evidencia%206.png)
+![Swagger V1 - Respostas de erro](assets/swagger/v1/evidencia_6.png)
 
 #### Swagger V1 - Schema de resposta
-![Swagger V1 - Schema de resposta](assets/swagger/v1/evidencia%207.png)
+![Swagger V1 - Schema de resposta](assets/swagger/v1/evidencia_7.png)
 
 ### Documentação Swagger - Versão 2
 
 A versão 2 da API utiliza autenticação JWT e está documentada separadamente no Swagger. As imagens abaixo ilustram a documentação dos endpoints V2, incluindo o recurso de autenticação Bearer Token:
 
 #### Swagger V2 - Visão geral
-![Swagger V2 - Visão geral](assets/swagger/v2/evidencia%201.png)
+![Swagger V2 - Visão geral](assets/swagger/v2/evidencia_1.png)
 
 #### Swagger V2 - Autenticação JWT
-![Swagger V2 - Autenticação JWT](assets/swagger/v2/evidencia%202.png)
+![Swagger V2 - Autenticação JWT](assets/swagger/v2/evidencia_2.png)
 
 #### Swagger V2 - Autenticação JWT
-![Swagger V2 - Autenticação JWT](assets/swagger/v2/evidencia%203.png)
+![Swagger V2 - Autenticação JWT](assets/swagger/v2/evidencia_3.png)
 
 #### Swagger V2 - Detalhes do endpoint
-![Swagger V2 - Detalhes do endpoint](assets/swagger/v2/evidencia%204.png)
+![Swagger V2 - Detalhes do endpoint](assets/swagger/v2/evidencia_4.png)
 
 #### Swagger V2 - Respostas de erro
-![Swagger V2 - Respostas de erro](assets/swagger/v2/evidencia%205.png)
+![Swagger V2 - Respostas de erro](assets/swagger/v2/evidencia_5.png)
 
 #### Swagger V2 - Schemas
-![Swagger V2 - Schemas](assets/swagger/v2/evidencia%206.png)
+![Swagger V2 - Schemas](assets/swagger/v2/evidencia_6.png)
 
 Para validação sistemática dos cenários de borda, criei uma coleção completa do Postman (`Food_Backend_ProblemDetail_Tests.postman_collection.json`) que cobre diversos casos de teste, incluindo login inválido (retorna 404 com ProblemDetail), tentativa de cadastro com email duplicado (retorna 400 com ProblemDetail), requisições sem autenticação em endpoints protegidos (retorna 401), validações de campos obrigatórios, e fluxos completos de CRUD. A coleção utiliza variáveis de ambiente (`{{base_url}}`, `{{user_id}}`, `{{jwt_token}}`) para facilitar execução em diferentes ambientes.
 
@@ -235,54 +235,223 @@ A coleção está organizada em pastas que seguem a estrutura dos testes, facili
 Os testes de autenticação validam o fluxo de login e logout, tanto na versão 1 (sessão HTTP) quanto na versão 2 (JWT). Alguns exemplos:
 
 #### Login com sucesso
-![Postman - Login com sucesso](assets/postman/0-Autentica%C3%A7%C3%A3o/POST%20-%20Login%20%28sucesso%29.png)
+![Postman - Login com sucesso](assets/postman/0-Autenticacao/POST-Login_(sucesso).png)
 
-#### Login com usuário não encontrado
-![Postman - Login com usuário não encontrado](assets/postman/0-Autentica%C3%A7%C3%A3o/POST%20-%20Login%20%28usu%C3%A1rio%20n%C3%A3o%20encontrado%29.png)
+#### Acesso não autorizado após logout
+![Postman - Acesso não autorizado após logout](assets/postman/0-Autenticacao/GET-Acesso_nao_autorizado_(apos_logout).png)
 
 #### Acesso não autorizado sem login
-![Postman - Acesso não autorizado sem login](assets/postman/0-Autentica%C3%A7%C3%A3o/GET%20-%20Acesso%20n%C3%A3o%20autorizado%20%28sem%20login%29.png)
+![Postman - Acesso não autorizado (sem login)](assets/postman/0-Autenticacao/GET-Acesso_nao_autorizado_(sem_login).png)
+
+#### Login senha incorreta
+![Postman - Login senha incorreta](assets/postman/0-Autenticacao/POST-Login_(senha_incorreta).png)
+
+#### Login com usuário não encontrado
+![Postman - Login com usuário não encontrado](assets/postman/0-Autenticacao/POST-Login_(usuario_nao_encontrado).png)
+
+#### Login com validação de login vazio
+![Postman - Login com validação de login vazio](assets/postman/0-Autenticacao/POST-Login_(validacao_-_login_vazio).png)
+
+#### Login com validação de senha vazia
+![Postman - Login com validação de senha vazia](assets/postman/0-Autenticacao/POST-Login_(validacao_-_senha_vazia).png)
+
+#### Logout
+![Postman - Logout](assets/postman/0-Autenticacao/POST-Logout.png)
 
 ### Testes de Erro - ResourceNotFoundException (404)
 
 Estes testes validam que a API retorna corretamente o status 404 quando um recurso não é encontrado:
 
 #### Buscar usuário por ID inexistente
-![Postman - Usuário inexistente por ID](assets/postman/1-ResourceNotFoundException%20(404)/GET%20-%20Buscar%20usu%C3%A1rio%20por%20ID%20inexistente.png)
+![Postman - Buscar usuário inexistente por ID](assets/postman/1-ResourceNotFoundException_404/GET-Buscar_usuario_por_ID_inexistente.png)
+
+#### Buscar usuário por email inexistente
+![Postman - Buscar usuário inexistente por email](assets/postman/1-ResourceNotFoundException_404/GET-Buscar_usuario_por_email_inexistente.png)
+
+#### Buscar usuário por login inexistente
+![Postman - Buscar usuário inexistente por login](assets/postman/1-ResourceNotFoundException_404/GET-Buscar_usuario_por_login_inexistente.png)
+
+#### Deletar usuário inexistente
+![Postman - Deletar usuário inexistente](assets/postman/1-ResourceNotFoundException_404/DELETE-Deletar_usuario_inexistente.png)
+
+#### Atualizar usuário inexistente
+![Postman - Atualizar usuário inexistente](assets/postman/1-ResourceNotFoundException_404/PUT-Atualizar_usuario_inexistente.png)
+
+#### Alterar senha de usuário inexistente
+![Postman - Alterar senha de usuário inexistente](assets/postman/1-ResourceNotFoundException_404/PATCH-Alterar_senha_usuario_inexistente.png)
 
 ### Testes de Erro - DomainValidationException (400)
 
 Estes testes validam regras de negócio que retornam 400:
 
 #### Criar usuário com email duplicado
-![Postman - Email duplicado](assets/postman/2-DomainValidationException%20(400)/POST%20-%20Criar%20usu%C3%A1rio%20com%20email%20duplicado.png)
+![Postman - Email duplicado](assets/postman/2-DomainValidationException_400/POST-Criar_usuario_com_email_duplicado.png)
+
+#### Alterar senha com senha atual igual a senha nova
+![Postman - Alterar senha com senha atual igual a senha nova](assets/postman/2-DomainValidationException_400/PATCH-Alterar_senha__(senha_atual_igual_nova_senha).png)
 
 ### Testes de Erro - MethodArgumentNotValidException (400)
 
 Estes testes validam as validações de entrada dos DTOs:
 
+#### Alterar senha com campos vazios
+![Postman - Alterar senha com campos vazios](assets/postman/3-MethodArgumentNotValidException_400/PATCH-Alterar_senha_(campos_vazios).png)
+
+#### Alterar senha com nova senha muito curta
+![Postman - Alterar senha com nova senha muito curta](assets/postman/3-MethodArgumentNotValidException_400/PATCH-Alterar_senha_(nova_senha_muito_curta).png)
+
+#### Criar usuário com body vazio
+![Postman - Criar usuário com body vazio](assets/postman/3-MethodArgumentNotValidException_400/POST-Criar_usuario_(body_vazio).png)
+
+#### Criar usuário com email inválido
+![Postman - Criar usuário com email inválido](assets/postman/3-MethodArgumentNotValidException_400/POST-Criar_usuario_(email_invalido).png)
+
 #### Criar usuário com múltiplos campos inválidos
-![Postman - Campos inválidos](assets/postman/3-MethodArgumentNotValidException%20(400)/POST%20-%20Criar%20usu%C3%A1rio%20%28m%C3%BAltiplos%20campos%20inv%C3%A1lidos%29.png)
+![Postman - Criar usuário com múltiplos campos inválidos](assets/postman/3-MethodArgumentNotValidException_400/POST-Criar_usuario_(multiplos_campos_invalidos).png)
+
+#### Criar usuário com name vazio
+![Postman - Criar usuário com name vazio](assets/postman/3-MethodArgumentNotValidException_400/POST-Criar_usuario_(name_vazio).png)
+
+#### Criar usuário com senha muito curta
+![Postman - Criar usuário com senha muito curta](assets/postman/3-MethodArgumentNotValidException_400/POST-Criar_usuario_(senha_muito_curta).png)
+
+#### Atualizar usuário com name vazio
+![Postman - Atualizar usuário com name vazio](assets/postman/3-MethodArgumentNotValidException_400/PUT-Atualizar_usuario_(name_vazio).png)
+
+### Outros Testes de Erro
+
+Estes testes validam o tratamento de erros adicionais relacionados a requisições malformadas, endpoints inexistentes, tipos de conteúdo não suportados e outros cenários de erro:
+
+#### Endpoint inexistente (GET)
+![Postman - Endpoint inexistente (GET)](assets/postman/4-Novos_Tratamentos_de_Erro/GET-Endpoint_inexistente.png)
+
+#### Endpoint inexistente (POST)
+![Postman - Endpoint inexistente (POST)](assets/postman/4-Novos_Tratamentos_de_Erro/POST-Endpoint_inexistente.png)
+
+#### ID com tipo inválido (string) - GET
+![Postman - ID com tipo inválido (string) - GET](assets/postman/4-Novos_Tratamentos_de_Erro/GET-ID_com_tipo_invalido_(string).png)
+
+#### ID com tipo inválido - PUT
+![Postman - ID com tipo inválido - PUT](assets/postman/4-Novos_Tratamentos_de_Erro/PUT-ID_com_tipo_invalido.png)
+
+#### Parâmetro email faltando
+![Postman - Parâmetro email faltando](assets/postman/4-Novos_Tratamentos_de_Erro/GET-Parametro_email_faltando.png)
+
+#### Parâmetro login faltando
+![Postman - Parâmetro login faltando](assets/postman/4-Novos_Tratamentos_de_Erro/GET-Parametro_login_faltando.png)
+
+#### Parâmetro name faltando
+![Postman - Parâmetro name faltando](assets/postman/4-Novos_Tratamentos_de_Erro/GET-Parametro_name_faltando.png)
+
+#### Body vazio quando obrigatório
+![Postman - Body vazio quando obrigatório](assets/postman/4-Novos_Tratamentos_de_Erro/POST-Body_vazio_quando_obrigatorio.png)
+
+#### Content-Type não suportado (XML) - POST
+![Postman - Content-Type não suportado (XML) - POST](assets/postman/4-Novos_Tratamentos_de_Erro/POST-Content-Type_nao_suportado_(XML).png)
+
+#### Content-Type não suportado (text/plain) - PUT
+![Postman - Content-Type não suportado (text/plain) - PUT](assets/postman/4-Novos_Tratamentos_de_Erro/PUT-Content-Type_nao_suportado_(text:plain).png)
+
+#### JSON malformado
+![Postman - JSON malformado](assets/postman/4-Novos_Tratamentos_de_Erro/POST-JSON_malformado.png)
+
+#### Método HTTP não suportado (tentar POST em GET)
+![Postman - Método HTTP não suportado (tentar POST em GET)](assets/postman/4-Novos_Tratamentos_de_Erro/POST-Metodo_HTTP_nao_suportado_(tentar_POST_em_GET).png)
 
 ### Testes de Casos de Sucesso
 
 Os testes de casos de sucesso validam que os endpoints funcionam corretamente quando recebem dados válidos:
 
-#### Criar usuário válido (público)
-![Postman - Criar usuário válido](assets/postman/5-Casos%20de%20Sucesso/POST%20-%20Criar%20usu%C3%A1rio%20v%C3%A1lido%20%28p%C3%BAblico%29.png)
+#### Criar usuário válido (endpoint público)
+![Postman - Criar usuário válido (endpoint público)](assets/postman/5-Casos_de_Sucesso/POST-Criar_usuario_valido_(publico).png)
+
+#### Login (antes de acessar endpoints protegidos)
+![Postman - Login (antes de acessar endpoints protegidos)](assets/postman/5-Casos_de_Sucesso/POST-Login_(antes_de_acessar_endpoints_protegidos).png)
 
 #### Listar todos os usuários
-![Postman - Listar usuários](assets/postman/5-Casos%20de%20Sucesso/GET%20-%20Listar%20todos%20os%20usu%C3%A1rios.png)
+![Postman - Listar todos os usuários](assets/postman/5-Casos_de_Sucesso/GET-Listar_todos_os_usuarios.png)
+
+#### Buscar usuário por ID
+![Postman - Buscar usuário por ID](assets/postman/5-Casos_de_Sucesso/GET-Buscar_usuario_por_ID.png)
+
+#### Buscar usuário por nome
+![Postman - Buscar usuário por nome](assets/postman/5-Casos_de_Sucesso/GET-Buscar_usuario_por_nome.png)
+
+#### Buscar usuário por email
+![Postman - Buscar usuário por email](assets/postman/5-Casos_de_Sucesso/GET-Buscar_usuario_por_email.png)
+
+#### Buscar usuário por login
+![Postman - Buscar usuário por login](assets/postman/5-Casos_de_Sucesso/GET-Buscar_usuario_por_login.png)
+
+#### Atualizar usuário
+![Postman - Atualizar usuário](assets/postman/5-Casos_de_Sucesso/PUT-Atualizar_usuario.png)
+
+#### Alterar senha
+![Postman - Alterar senha](assets/postman/5-Casos_de_Sucesso/PATCH-Alterar_senha.png)
+
+#### Deletar usuário
+![Postman - Deletar usuário](assets/postman/5-Casos_de_Sucesso/DELETE-Deletar_usuario.png)
 
 ### Testes V2 - Autenticação JWT
 
-A versão 2 utiliza autenticação JWT, e os testes validam o fluxo completo:
+A versão 2 utiliza autenticação JWT através do Spring Security. Os testes estão organizados em três categorias principais que validam o fluxo completo de autenticação, casos de sucesso e tratamento de erros.
 
-#### Login V2 com sucesso
-![Postman - Login V2 com sucesso](assets/postman/6-Endpoints%20V2%20-%20JWT%20Authentication/6.1-Autentica%C3%A7%C3%A3o%20V2/POST%20-%20Login%20V2%20%28sucesso%29.png)
+#### Autenticação V2
 
-#### Acesso não autorizado V2 sem token
-![Postman - Acesso não autorizado V2 sem token](assets/postman/6-Endpoints%20V2%20-%20JWT%20Authentication/6.1-Autentica%C3%A7%C3%A3o%20V2/GET%20-%20Acesso%20n%C3%A3o%20autorizado%20V2%20%28sem%20token%29.png)
+Os testes de autenticação V2 validam o fluxo de login e logout com JWT, além de cenários de acesso não autorizado:
+
+##### Login V2 com sucesso
+![Postman - Login V2 com sucesso](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/POST_-_Login_V2_(sucesso).png)
+
+##### Login V2 com usuário não encontrado
+![Postman - Login V2 com usuário não encontrado](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/POST_-_Login_V2_(usuario_nao_encontrado).png)
+
+##### Login V2 com senha incorreta
+![Postman - Login V2 com senha incorreta](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/POST_-_Login_V2_(senha_incorreta).png)
+
+##### Acesso não autorizado V2 sem token
+![Postman - Acesso não autorizado V2 sem token](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/GET_-_Acesso_nao_autorizado_V2_(sem_token).png)
+
+##### Acesso não autorizado V2 com token inválido
+![Postman - Acesso não autorizado V2 com token inválido](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/GET_-_Acesso_nao_autorizado_V2_(token_invalido).png)
+
+##### Logout V2 com sucesso
+![Postman - Logout V2 com sucesso](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/POST_-_Logout_V2_(sucesso).png)
+
+##### Logout V2 sem token (erro 401)
+![Postman - Logout V2 sem token (erro 401)](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/POST_-_Logout_V2_(sem_token_-_erro_401).png)
+
+#### Casos de Sucesso V2
+
+Os testes de casos de sucesso V2 validam que os endpoints protegidos funcionam corretamente quando autenticados com JWT:
+
+##### Criar usuário V2 (endpoint público)
+![Postman - Criar usuário V2 (endpoint público)](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.2-Casos_de_Sucesso_V2/POST_-_Criar_usuario_V2_(publico).png)
+
+##### Listar todos os usuários V2
+![Postman - Listar todos os usuários V2](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.2-Casos_de_Sucesso_V2/GET_-_Listar_todos_os_usuarios_V2.png)
+
+##### Buscar usuário por ID V2
+![Postman - Buscar usuário por ID V2](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.2-Casos_de_Sucesso_V2/GET_-_Buscar_usuario_por_ID_V2.png)
+
+##### Buscar usuários por nome V2
+![Postman - Buscar usuários por nome V2](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.2-Casos_de_Sucesso_V2/GET_-_Buscar_usuarios_por_nome_V2.png)
+
+##### Atualizar usuário V2
+![Postman - Atualizar usuário V2](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.2-Casos_de_Sucesso_V2/PUT_-_Atualizar_usuario_V2.png)
+
+#### Erros V2 (ProblemDetail)
+
+Os testes de erros V2 validam que os erros retornados seguem o padrão RFC 7807 (ProblemDetail):
+
+##### Criar usuário V2 com email duplicado
+![Postman - Criar usuário V2 com email duplicado](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.3-Erros_V2_(ProblemDetail)/POST_-_Criar_usuario_V2_(email_duplicado).png)
+
+##### Criar usuário V2 com validação (campos inválidos)
+![Postman - Criar usuário V2 com validação (campos inválidos)](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.3-Erros_V2_(ProblemDetail)/POST_-_Criar_usuario_V2_(validacao_-_campos_invalidos).png)
+
+##### Usuário inexistente V2
+![Postman - Usuário inexistente V2](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.3-Erros_V2_(ProblemDetail)/GET_-_Usuario_inexistente_V2.png)
 
 ### Testes Automatizados e Cobertura de Código (JaCoCo)
 
@@ -355,10 +524,10 @@ O projeto foi containerizado utilizando Docker e Docker Compose para facilitar a
 Durante o desenvolvimento e testes, utilizei o Docker Desktop para gerenciar os containers e o IntelliJ IDEA para executar a aplicação quando necessário. As imagens abaixo mostram os containers em execução:
 
 #### Docker - Containers em execução no Docker Desktop
-![Docker - Containers em execução](assets/docker/evidencia%201.png)
+![Docker - Containers em execução](assets/docker/evidencia_1.png)
 
 #### Docker - Detalhes dos containers no IntelliJ IDEA
-![Docker - Detalhes dos containers](assets/docker/evidencia%202.png)
+![Docker - Detalhes dos containers](assets/docker/evidencia_2.png)
 
 ### Serviços Configurados
 
