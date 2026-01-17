@@ -288,6 +288,67 @@ class UserServiceTest {
         assertNotNull(result);
         assertEquals(2, result.size());
         verify(repository, times(1)).findByNameContainingIgnoreCaseOrderByNameAsc("Test");
+        verify(repository, never()).findAll();
+    }
+
+    @Test
+    @DisplayName("Should return all users when name is null")
+    void shouldReturnAllUsersWhenNameIsNull() {
+        // Arrange
+        User user2 = new User();
+        user2.setId(2L);
+        user2.setName("Another User");
+        List<User> users = Arrays.asList(user, user2);
+        when(repository.findAll()).thenReturn(users);
+
+        // Act
+        List<User> result = userService.searchByName(null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(repository, times(1)).findAll();
+        verify(repository, never()).findByNameContainingIgnoreCaseOrderByNameAsc(anyString());
+    }
+
+    @Test
+    @DisplayName("Should return all users when name is empty")
+    void shouldReturnAllUsersWhenNameIsEmpty() {
+        // Arrange
+        User user2 = new User();
+        user2.setId(2L);
+        user2.setName("Another User");
+        List<User> users = Arrays.asList(user, user2);
+        when(repository.findAll()).thenReturn(users);
+
+        // Act
+        List<User> result = userService.searchByName("");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(repository, times(1)).findAll();
+        verify(repository, never()).findByNameContainingIgnoreCaseOrderByNameAsc(anyString());
+    }
+
+    @Test
+    @DisplayName("Should return all users when name is only whitespace")
+    void shouldReturnAllUsersWhenNameIsOnlyWhitespace() {
+        // Arrange
+        User user2 = new User();
+        user2.setId(2L);
+        user2.setName("Another User");
+        List<User> users = Arrays.asList(user, user2);
+        when(repository.findAll()).thenReturn(users);
+
+        // Act
+        List<User> result = userService.searchByName("   ");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(repository, times(1)).findAll();
+        verify(repository, never()).findByNameContainingIgnoreCaseOrderByNameAsc(anyString());
     }
 
     @Test

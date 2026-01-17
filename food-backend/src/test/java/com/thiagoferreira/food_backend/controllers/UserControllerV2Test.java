@@ -163,6 +163,58 @@ class UserControllerV2Test {
     }
 
     @Test
+    @DisplayName("Should return all users when name is null")
+    void shouldReturnAllUsersWhenNameIsNull() {
+        // Arrange
+        User user2 = new User();
+        user2.setId(2L);
+        user2.setName("User 2");
+        List<User> users = Arrays.asList(user, user2);
+        UserResponse userResponse2 = new UserResponse();
+        userResponse2.setId(2L);
+        userResponse2.setName("User 2");
+
+        when(userService.searchByName(null)).thenReturn(users);
+        when(userMapper.toResponse(user)).thenReturn(userResponse);
+        when(userMapper.toResponse(user2)).thenReturn(userResponse2);
+
+        // Act
+        ResponseEntity<List<UserResponse>> response = userControllerV2.searchByName(null);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        verify(userService, times(1)).searchByName(null);
+    }
+
+    @Test
+    @DisplayName("Should return all users when name is empty")
+    void shouldReturnAllUsersWhenNameIsEmpty() {
+        // Arrange
+        User user2 = new User();
+        user2.setId(2L);
+        user2.setName("User 2");
+        List<User> users = Arrays.asList(user, user2);
+        UserResponse userResponse2 = new UserResponse();
+        userResponse2.setId(2L);
+        userResponse2.setName("User 2");
+
+        when(userService.searchByName("")).thenReturn(users);
+        when(userMapper.toResponse(user)).thenReturn(userResponse);
+        when(userMapper.toResponse(user2)).thenReturn(userResponse2);
+
+        // Act
+        ResponseEntity<List<UserResponse>> response = userControllerV2.searchByName("");
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        verify(userService, times(1)).searchByName("");
+    }
+
+    @Test
     @DisplayName("Should search user by login successfully")
     void shouldSearchUserByLoginSuccessfully() {
         // Arrange

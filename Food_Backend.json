@@ -581,20 +581,6 @@
 					"response": []
 				},
 				{
-					"name": "GET - Parâmetro name faltando",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/v1/users/search/name",
-							"host": ["{{base_url}}"],
-							"path": ["v1", "users", "search", "name"]
-						},
-						"description": "Testa MissingServletRequestParameterException - parâmetro name faltando"
-					},
-					"response": []
-				},
-				{
 					"name": "GET - Parâmetro login faltando",
 					"request": {
 						"method": "GET",
@@ -864,11 +850,25 @@
 								{
 									"key": "name",
 									"value": "João",
-									"description": "Nome do usuário para buscar"
+									"description": "Nome do usuário para buscar (opcional - se não fornecido, retorna todos)"
 								}
 							]
 						},
-						"description": "Busca usuários por nome (retorna lista). PRÉ-REQUISITO: Fazer login primeiro"
+						"description": "Busca usuários por nome (retorna lista). O parâmetro 'name' é OPCIONAL - se não fornecido, retorna todos os usuários. PRÉ-REQUISITO: Fazer login primeiro"
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Buscar todos os usuários (sem parâmetro name)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/users/search/name",
+							"host": ["{{base_url}}"],
+							"path": ["v1", "users", "search", "name"]
+						},
+						"description": "Busca todos os usuários quando o parâmetro name não é fornecido. PRÉ-REQUISITO: Fazer login primeiro"
 					},
 					"response": []
 				},
@@ -1216,11 +1216,31 @@
 									"query": [
 										{
 											"key": "name",
-											"value": "Maria"
+											"value": "Maria",
+											"description": "Nome do usuário para buscar (opcional - se não fornecido, retorna todos)"
 										}
 									]
 								},
-								"description": "Busca usuários por nome usando JWT token. PRÉ-REQUISITO: Fazer login v2 primeiro"
+								"description": "Busca usuários por nome usando JWT token. O parâmetro 'name' é OPCIONAL - se não fornecido, retorna todos os usuários. PRÉ-REQUISITO: Fazer login v2 primeiro"
+							},
+							"response": []
+						},
+						{
+							"name": "GET - Buscar todos os usuários V2 (sem parâmetro name)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/v2/users/search/name",
+									"host": ["{{base_url}}"],
+									"path": ["v2", "users", "search", "name"]
+								},
+								"description": "Busca todos os usuários quando o parâmetro name não é fornecido (V2 com JWT). PRÉ-REQUISITO: Fazer login v2 primeiro"
 							},
 							"response": []
 						},

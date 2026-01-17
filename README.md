@@ -51,8 +51,14 @@ food-backend/
 │   │   ├── java/com/thiagoferreira/food_backend/
 │   │   │   ├── Application.java                    # Classe principal
 │   │   │   ├── controllers/                        # Controladores REST
-│   │   │   │   ├── AuthController.java
-│   │   │   │   └── UserController.java
+│   │   │   │   ├── AuthController.java             # Implementação V1
+│   │   │   │   ├── AuthControllerApi.java          # Interface V1
+│   │   │   │   ├── AuthControllerV2.java           # Implementação V2
+│   │   │   │   ├── AuthControllerV2Api.java        # Interface V2
+│   │   │   │   ├── UserController.java             # Implementação V1
+│   │   │   │   ├── UserControllerApi.java          # Interface V1
+│   │   │   │   ├── UserControllerV2.java           # Implementação V2
+│   │   │   │   └── UserControllerV2Api.java        # Interface V2
 │   │   │   ├── interceptors/                       # Interceptadores HTTP
 │   │   │   │   └── AuthInterceptor.java
 │   │   │   ├── domain/
@@ -206,7 +212,7 @@ A documentação completa da API está disponível através do **Swagger UI** qu
 | POST | `/v1/users` | Criar novo usuário | Não requerida (público) |
 | GET | `/v1/users` | Listar todos os usuários | Requerida |
 | GET | `/v1/users/{id}` | Buscar usuário por ID | Requerida |
-| GET | `/v1/users/search/name?name={nome}` | Buscar usuários por nome | Requerida |
+| GET | `/v1/users/search/name?name={nome}` | Buscar usuários por nome (parâmetro `name` opcional - se não fornecido, retorna todos) | Requerida |
 | GET | `/v1/users/search/login?login={login}` | Buscar usuário por login | Requerida |
 | GET | `/v1/users/search/email?email={email}` | Buscar usuário por email | Requerida |
 | PUT | `/v1/users/{id}` | Atualizar informações do usuário | Requerida |
@@ -391,7 +397,7 @@ Todos os demais endpoints `/v2/**` requerem autenticação via JWT. Se uma requi
 | POST | `/v2/users` | Criar novo usuário | Não requerida (público) |
 | GET | `/v2/users` | Listar todos os usuários | Requerida (JWT) |
 | GET | `/v2/users/{id}` | Buscar usuário por ID | Requerida (JWT) |
-| GET | `/v2/users/search/name?name={nome}` | Buscar usuários por nome | Requerida (JWT) |
+| GET | `/v2/users/search/name?name={nome}` | Buscar usuários por nome (parâmetro `name` opcional - se não fornecido, retorna todos) | Requerida (JWT) |
 | GET | `/v2/users/search/login?login={login}` | Buscar usuário por login | Requerida (JWT) |
 | GET | `/v2/users/search/email?email={email}` | Buscar usuário por email | Requerida (JWT) |
 | PUT | `/v2/users/{id}` | Atualizar informações do usuário | Requerida (JWT) |
@@ -495,6 +501,14 @@ O projeto segue uma arquitetura em camadas:
 5. **DTO Layer** - Objetos de transferência de dados
 6. **Exception Handler** - Tratamento centralizado de exceções
 
+### Diagrama da Arquitetura
+
+O diagrama visual abaixo ilustra a arquitetura completa do sistema, incluindo as camadas, componentes principais e fluxo de dados. Este diagrama foi gerado utilizando o DiagramGPT da Eraser.
+
+![Diagrama da Arquitetura do Sistema](assets/diagram/diagrama.png)
+
+*Nota: Diagrama gerado utilizando o DiagramGPT da Eraser (https://eraser.io)*
+
 ### Padrões Utilizados
 
 - **DTO Pattern** - Separação entre entidades de domínio e objetos de transferência
@@ -502,6 +516,69 @@ O projeto segue uma arquitetura em camadas:
 - **Repository Pattern** - Abstração de acesso a dados
 - **Service Layer Pattern** - Isolamento da lógica de negócio
 - **Exception Handler Pattern** - Tratamento centralizado de exceções
+- **Interface-based Controller Pattern** - Separação de contrato e implementação dos controllers
+
+### Arquitetura de Controllers com Interfaces
+
+O projeto implementa uma arquitetura de controllers baseada em interfaces que separa o contrato da API (definido na interface) da implementação concreta (classe controller). Esta abordagem traz diversos benefícios:
+
+**Estrutura:**
+- **Interfaces API** (`*ControllerApi`, `*ControllerV2Api`): Definem o contrato dos endpoints REST
+- **Classes de Implementação** (`*Controller`, `*ControllerV2`): Implementam a lógica dos endpoints
+
+**Migração de Anotações:**
+Todas as anotações relacionadas ao contrato da API foram movidas para as interfaces:
+
+- **Anotações Spring Web**: `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, `@PatchMapping`, `@RequestMapping`, `@PathVariable`, `@RequestParam`, `@RequestBody`
+- **Anotações de Validação**: `@Valid`, `@NotNull`, `@NotBlank`, etc.
+- **Anotações de Documentação**: `@Operation`, `@Tag`, `@ApiResponse`, `@ApiResponses`, `@SecurityRequirement`
+
+**Classes de Implementação:**
+As classes controllers mantêm apenas:
+- `@RestController` - Identifica a classe como um controller REST do Spring
+- `@RequiredArgsConstructor` - Lombok para injeção de dependências via construtor
+- `@Override` - Nos métodos que implementam a interface
+
+**Exemplo de Estrutura:**
+
+```java
+// Interface - Define o contrato e anotações
+@RequestMapping("/v1/users")
+@Tag(name = "Users", description = "...")
+public interface UserControllerApi {
+    
+    @PostMapping
+    @Operation(summary = "Create a new user", ...)
+    @ApiResponses(...)
+    ResponseEntity<UserResponse> create(
+        @RequestBody @Valid UserRequest userRequest
+    );
+}
+
+// Implementação - Apenas lógica de negócio
+@RestController
+@RequiredArgsConstructor
+public class UserController implements UserControllerApi {
+    
+    private final UserService userService;
+    private final UserMapper userMapper;
+    
+    @Override
+    public ResponseEntity<UserResponse> create(UserRequest userRequest) {
+        // Lógica de implementação
+        User user = userService.createUser(userMapper.toEntity(userRequest));
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(userMapper.toResponse(user));
+    }
+}
+```
+
+**Benefícios:**
+- **Separação de Responsabilidades**: Contrato (interface) separado da implementação (classe)
+- **Testabilidade**: Facilita criação de mocks para testes
+- **Documentação Centralizada**: Anotações Swagger/OpenAPI concentradas nas interfaces
+- **Manutenibilidade**: Mudanças no contrato são visíveis primeiro na interface
+- **Clareza**: Interfaces servem como documentação viva da API
 
 ## 🧪 Testes
 
@@ -550,7 +627,7 @@ O projeto inclui:
 ### Testes com Postman
 
 Uma coleção do Postman está disponível no arquivo:
-- `Food_Backend_ProblemDetail_Tests.postman_collection.json`
+- `Food_Backend.json`
 
 Consulte o arquivo `POSTMAN_TEST_GUIDE.md` para mais detalhes sobre como usar a coleção de testes.
 

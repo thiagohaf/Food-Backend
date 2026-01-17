@@ -28,11 +28,11 @@ Este documento contém todos os cenários de teste para validar a implementaçã
 ### Pré-requisitos
 - Aplicação em execução (local ou Docker)
 - Postman instalado
-- Collection importada: `Food_Backend_ProblemDetail_Tests.postman_collection.json`
+- Collection importada: `Food_Backend.json`
 
 ### Configuração Inicial
 
-1. **Importe a Collection**: Abra o Postman e importe o arquivo `Food_Backend_ProblemDetail_Tests.postman_collection.json`
+1. **Importe a Collection**: Abra o Postman e importe o arquivo `Food_Backend.json`
 
 2. **Configure a Base URL**: 
    - Se executando localmente (Maven): `http://localhost:8080`
@@ -694,22 +694,7 @@ Status: 200 OK
 }
 ```
 
-### 4.3. MissingServletRequestParameterException (400) - Parâmetro name faltando
-**Método:** `GET`  
-**URL:** `http://localhost:8080/v1/users/search/name`
-
-**Resposta Esperada (400):**
-```json
-{
-  "type": "https://api.food-backend.com/problems/missing-parameter",
-  "title": "Missing Required Parameter",
-  "status": 400,
-  "detail": "Required parameter 'name' is missing",
-  "parameter": "name"
-}
-```
-
-### 4.4. MissingServletRequestParameterException (400) - Parâmetro login faltando
+### 4.3. MissingServletRequestParameterException (400) - Parâmetro login faltando
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/search/login`
 
@@ -724,7 +709,7 @@ Status: 200 OK
 }
 ```
 
-### 4.5. MissingServletRequestParameterException (400) - Parâmetro email faltando
+### 4.4. MissingServletRequestParameterException (400) - Parâmetro email faltando
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/search/email`
 
@@ -739,7 +724,7 @@ Status: 200 OK
 }
 ```
 
-### 4.6. MethodArgumentTypeMismatchException (400) - ID com tipo inválido (string)
+### 4.5. MethodArgumentTypeMismatchException (400) - ID com tipo inválido (string)
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/abc`
 
@@ -756,7 +741,7 @@ Status: 200 OK
 }
 ```
 
-### 4.7. MethodArgumentTypeMismatchException (400) - ID com tipo inválido em PUT
+### 4.6. MethodArgumentTypeMismatchException (400) - ID com tipo inválido em PUT
 **Método:** `PUT`  
 **URL:** `http://localhost:8080/v1/users/xyz`  
 **Headers:** `Content-Type: application/json`  
@@ -786,7 +771,7 @@ Status: 200 OK
 }
 ```
 
-### 4.8. HttpRequestMethodNotSupportedException (405) - Método HTTP não suportado
+### 4.7. HttpRequestMethodNotSupportedException (405) - Método HTTP não suportado
 **Método:** `POST`  
 **URL:** `http://localhost:8080/v1/users/search/name?name=teste`  
 **Headers:** `Content-Type: application/json`  
@@ -807,7 +792,7 @@ Status: 200 OK
 }
 ```
 
-### 4.9. HttpMediaTypeNotSupportedException (415) - Content-Type XML não suportado
+### 4.8. HttpMediaTypeNotSupportedException (415) - Content-Type XML não suportado
 **Método:** `POST`  
 **URL:** `http://localhost:8080/v1/users`  
 **Headers:** `Content-Type: application/xml`  
@@ -831,7 +816,7 @@ Status: 200 OK
 }
 ```
 
-### 4.10. HttpMediaTypeNotSupportedException (415) - Content-Type text/plain não suportado
+### 4.9. HttpMediaTypeNotSupportedException (415) - Content-Type text/plain não suportado
 **Método:** `PUT`  
 **URL:** `http://localhost:8080/v1/users/1`  
 **Headers:** `Content-Type: text/plain`  
@@ -852,7 +837,7 @@ name=João
 }
 ```
 
-### 4.11. NoHandlerFoundException (404) - Endpoint inexistente (GET)
+### 4.10. NoHandlerFoundException (404) - Endpoint inexistente (GET)
 **Método:** `GET`  
 **URL:** `http://localhost:8080/v1/users/inexistente/rota`
 
@@ -868,7 +853,7 @@ name=João
 }
 ```
 
-### 4.12. NoHandlerFoundException (404) - Endpoint inexistente (POST)
+### 4.11. NoHandlerFoundException (404) - Endpoint inexistente (POST)
 **Método:** `POST`  
 **URL:** `http://localhost:8080/v1/users/rota/que/nao/existe`  
 **Headers:** `Content-Type: application/json`  
@@ -1008,10 +993,13 @@ Status: 200 OK
 ### 5.5. Buscar usuários por nome
 **Pré-requisito:** Fazer login primeiro (ver seção 5.2)
 
-**Método:** `GET`  
-**URL:** `http://localhost:8080/v1/users/search/name?name=João`
+**Nota:** O parâmetro `name` é **opcional**. Se não for fornecido (ou for vazio), retorna todos os usuários.
 
-**Resposta Esperada (200):**
+**Método:** `GET`  
+**URL (com nome):** `http://localhost:8080/v1/users/search/name?name=João`  
+**URL (sem nome - retorna todos):** `http://localhost:8080/v1/users/search/name`
+
+**Resposta Esperada (200) - Com nome fornecido:**
 ```json
 [
   {
@@ -1028,6 +1016,35 @@ Status: 200 OK
     },
     "createdAt": "2024-01-01T10:00:00",
     "lastUpdated": "2024-01-01T10:00:00"
+  }
+]
+```
+
+**Resposta Esperada (200) - Sem nome fornecido (retorna todos):**
+```json
+[
+  {
+    "id": 1,
+    "name": "João Silva",
+    "email": "joao@email.com",
+    "login": "joaosilva",
+    "type": "CUSTOMER",
+    "address": {
+      "street": "Rua Teste",
+      "number": "123",
+      "city": "São Paulo",
+      "zipCode": "01234-567"
+    },
+    "createdAt": "2024-01-01T10:00:00",
+    "lastUpdated": "2024-01-01T10:00:00"
+  },
+  {
+    "id": 2,
+    "name": "Maria Santos",
+    "email": "maria@email.com",
+    "login": "mariasantos",
+    "type": "CUSTOMER",
+    ...
   }
 ]
 ```
@@ -1162,7 +1179,7 @@ A API agora possui uma versão 2 dos endpoints que utiliza autenticação basead
 - `POST /v2/users` - Criar usuário (público)
 - `GET /v2/users` - Listar usuários (requer JWT)
 - `GET /v2/users/{id}` - Buscar usuário por ID (requer JWT)
-- `GET /v2/users/search/name?name={nome}` - Buscar por nome (requer JWT)
+- `GET /v2/users/search/name?name={nome}` - Buscar por nome (requer JWT). O parâmetro `name` é opcional - se não fornecido, retorna todos os usuários.
 - `GET /v2/users/search/login?login={login}` - Buscar por login (requer JWT)
 - `GET /v2/users/search/email?email={email}` - Buscar por email (requer JWT)
 - `PUT /v2/users/{id}` - Atualizar usuário (requer JWT)
@@ -1405,7 +1422,6 @@ Use esta checklist para garantir que testou todos os cenários:
 - [ ] **Novos Tratamentos de Erro**
   - [ ] JSON malformado
   - [ ] Body vazio quando obrigatório
-  - [ ] Parâmetro name faltando
   - [ ] Parâmetro login faltando
   - [ ] Parâmetro email faltando
   - [ ] ID com tipo inválido (string) - GET
@@ -1421,7 +1437,8 @@ Use esta checklist para garantir que testou todos os cenários:
   - [ ] Login (antes de acessar endpoints protegidos)
   - [ ] Listar todos os usuários
   - [ ] Buscar usuário por ID
-  - [ ] Buscar usuário por nome
+  - [ ] Buscar usuário por nome (com parâmetro)
+  - [ ] Buscar todos os usuários (sem parâmetro name)
   - [ ] Buscar usuário por login
   - [ ] Buscar usuário por email
   - [ ] Atualizar usuário
@@ -1439,7 +1456,8 @@ Use esta checklist para garantir que testou todos os cenários:
   - [ ] Criar usuário V2 (público)
   - [ ] Listar usuários V2 (com JWT)
   - [ ] Buscar usuário por ID V2 (com JWT)
-  - [ ] Buscar usuários por nome V2 (com JWT)
+  - [ ] Buscar usuários por nome V2 (com JWT - com parâmetro)
+  - [ ] Buscar todos os usuários V2 (com JWT - sem parâmetro name)
   - [ ] Atualizar usuário V2 (com JWT)
   - [ ] Erro V2 - usuário inexistente (404 com ProblemDetail)
   - [ ] Erro V2 - email duplicado (400 com ProblemDetail)
@@ -1450,7 +1468,7 @@ Use esta checklist para garantir que testou todos os cenários:
 ## 🔧 Configuração no Postman
 
 ### Importar Collection
-1. Importe a coleção do arquivo `Food_Backend_ProblemDetail_Tests.postman_collection.json`
+1. Importe a coleção do arquivo `Food_Backend.json`
 2. Ou crie uma nova Collection chamada "Food Backend - ProblemDetail Tests"
 3. Configure a variável de ambiente:
    - Variable: `base_url`

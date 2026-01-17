@@ -62,6 +62,9 @@ public class UserService {
     }
 
     public List<User> searchByName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return repository.findAll();
+        }
         return repository.findByNameContainingIgnoreCaseOrderByNameAsc(name);
     }
 

@@ -1,66 +1,68 @@
 # Relatório Técnico - Sistema de Gestão de Restaurantes
 
-**Autor:** Thiago Henrique Alves Ferreira  
-**Instituição:** FIAP - Faculdade de Informática e Administração Paulista  
-**Curso:** Arquitetura e Desenvolvimento Java  
-**Contato:** rm369442@fiap.com.br
+**Projeto:** Food Backend - Sistema de Gestão de Restaurantes
 
-**Repositório:** [https://github.com/thiagohaf/Food-Backend](https://github.com/thiagohaf/Food-Backend)
+**Equipe:**  
+- Thiago Henrique Alves Ferreira - RM369442
 
 ---
 
-## 1. Visão Geral e Arquitetura
+## 1. Introdução
 
-### Tecnologias Utilizadas
+### Descrição do Problema
 
-O projeto foi desenvolvido utilizando um conjunto moderno de tecnologias Java que garantem robustez, segurança e facilidade de manutenção. A seleção das tecnologias priorizou frameworks maduros e amplamente adotados no ecossistema Spring, permitindo aproveitar toda a comunidade e documentação disponível.
+O sistema de gestão de restaurantes foi desenvolvido para atender às necessidades de um ambiente onde diferentes tipos de usuários (proprietários de restaurantes e clientes) necessitam realizar operações de gerenciamento através de uma API REST robusta e segura. O desafio principal envolve a criação de um backend que forneça funcionalidades completas de CRUD para usuários, implementando mecanismos de autenticação e autorização, garantindo a segurança dos dados e oferecendo uma experiência consistente através de documentação automática e tratamento padronizado de erros.
 
-**Framework e Core:**
-- **Spring Boot 4.0.1**: Framework principal escolhido por sua capacidade de reduzir significativamente a configuração inicial através de convenções sensatas e autoconfiguração. O Spring Boot facilita muito o desenvolvimento através da automação de configuração e gestão de dependências, o que reduz significativamente o tempo de desenvolvimento e minimiza erros de configuração.
-- **Java 21**: Linguagem de programação utilizada, escolhida por ser uma versão LTS (Long Term Support) que oferece recursos modernos como Records, Pattern Matching e melhorias de performance.
-- **Maven**: Gerenciador de dependências e ferramenta de build utilizada. O projeto inclui Maven Wrapper (`mvnw`) para garantir consistência entre diferentes ambientes de desenvolvimento.
+O sistema precisa suportar operações como cadastro de usuários, autenticação, busca por diferentes critérios (nome, email, login, ID), atualização de informações cadastrais, alteração de senha e exclusão de usuários, sempre respeitando regras de negócio como unicidade de email e login, validação de credenciais e segurança na manipulação de senhas.
 
-**Persistência de Dados:**
-- **Spring Data JPA**: Camada de persistência que abstrai o acesso a dados através de interfaces Repository, reduzindo código boilerplate e simplificando operações CRUD.
-- **PostgreSQL 16**: Banco de dados relacional escolhido por sua robustez, conformidade com SQL, suporte a ACID e performance. A escolha por PostgreSQL permite garantir integridade referencial e transações críticas para operações como criação de usuário e alteração de senha.
-- **Hibernate**: ORM (Object-Relational Mapping) utilizado pelo Spring Data JPA, que mapeia entidades Java para tabelas do banco de dados e gerencia o ciclo de vida das entidades.
+### Objetivo do Projeto
 
-**Validação e Documentação:**
-- **Bean Validation (JSR 303/380)**: Especificação Java para validação de dados através de anotações, integrada ao Spring Boot Starter Validation. Utilizada para validações de entrada nos DTOs.
-- **SpringDoc OpenAPI 3 (v2.7.0)**: Biblioteca utilizada para gerar documentação automática da API em formato OpenAPI 3.0, disponibilizando interface Swagger UI interativa.
-- **Swagger Annotations (v2.2.22)**: Anotações para enriquecer a documentação da API com descrições detalhadas, exemplos e esquemas de resposta.
+Desenvolver um backend robusto utilizando Spring Boot para gerenciar usuários e atender aos requisitos definidos. O projeto visa implementar uma API REST completa com duas versões de autenticação coexistentes (V1 com sessão HTTP e V2 com JWT), tratamento padronizado de erros conforme RFC 7807 (ProblemDetail), validações em múltiplas camadas, documentação automática via Swagger/OpenAPI, e containerização através de Docker para facilitar a execução e deployment.
 
-**Segurança:**
-- **jBCrypt (v0.4)**: Biblioteca para hashing de senhas utilizando o algoritmo BCrypt, que gera salt automático para cada senha, aumentando a segurança contra ataques de força bruta.
-- **HttpSession**: Mecanismo de sessão HTTP utilizado na versão 1 (V1) para autenticação stateful baseada em sessão.
-- **Spring Security**: Framework de segurança do ecossistema Spring utilizado na versão 2 (V2) para gerenciar autenticação e autorização.
-- **JWT (JSON Web Tokens) - jjwt (v0.12.5)**: Biblioteca utilizada para implementar autenticação stateless através de tokens JWT na versão 2 (V2). A versão 0.12.5 foi escolhida por ser compatível com Java 21 e Spring Boot 4.0.1.
+## 2. Arquitetura do Sistema
 
-**Utilitários:**
-- **Lombok**: Biblioteca que reduz código boilerplate através de anotações processadas em tempo de compilação (ex: `@RequiredArgsConstructor`, `@Getter`, `@Setter`), mantendo o código mais limpo e legível.
+### Descrição da Arquitetura
 
-**Testes e Qualidade:**
-- **JUnit 5**: Framework de testes padrão da plataforma Java, incluído no Spring Boot Starter Test. Utilizado para escrever testes unitários e de integração.
-- **JaCoCo (v0.8.11)**: Ferramenta de análise de cobertura de código que instrumenta o código durante a execução dos testes e gera relatórios detalhados. Configurado com meta mínima de 80% de cobertura de linhas.
-- **Maven Surefire Plugin**: Plugin Maven que executa testes durante o build, integrado com o JaCoCo para coletar dados de cobertura.
+A arquitetura adotada segue um padrão em camadas (Layered Architecture) com separação clara de responsabilidades. O sistema está organizado em camadas distintas:
 
-**Containerização:**
-- **Docker**: Tecnologia de containerização utilizada para empacotar a aplicação e suas dependências em uma imagem isolada.
-- **Docker Compose**: Ferramenta para orquestrar múltiplos containers (aplicação Spring Boot e PostgreSQL), facilitando a execução local e garantindo consistência entre ambientes.
+**Camada de Apresentação (Controllers):**
+- Controllers REST separados por versão (V1 e V2), cada um implementando seus respectivos endpoints e tipos de autenticação
+- Utiliza padrão de interfaces (`*ControllerApi`, `*ControllerV2Api`) que definem o contrato da API e contêm todas as anotações Spring Web, Validação e Documentação
+- Os controllers focam exclusivamente em receber requisições HTTP, delegar processamento aos services e formatar respostas
 
-A escolha dessas tecnologias modernas como Spring Boot 4.0.1, Java 21, PostgreSQL e Docker garante que a aplicação esteja preparada para escalabilidade e manutenção futura, aproveitando as melhores práticas e padrões estabelecidos na comunidade Java.
+**Camada de Domínio (Entities e DTOs):**
+- Entidades JPA (`User`, `Address`) que representam o modelo de dados persistido
+- DTOs (`UserRequest`, `UserResponse`, `UserUpdateRequest`, `PasswordChangeRequest`) que protegem as entidades de domínio de exposição direta na API
+- Transformação entre DTOs e entidades realizada pelo `UserMapper`, centralizando a lógica de conversão
 
-A arquitetura adotada segue um padrão em camadas (Layered Architecture) com separação clara de responsabilidades. Optei por isolar as regras de negócio na camada de serviços (`UserService`), evitando que os controllers (`UserController`, `UserControllerV2`) fiquem poluídos com lógica de domínio. Os controllers focam exclusivamente em receber requisições HTTP, delegar processamento aos services e formatar respostas.
+**Camada de Serviços:**
+- `UserService` isolado dos controllers, contendo toda a lógica de negócio
+- Validações de domínio (unicidade de email/login, validação de senha)
+- Regras de negócio críticas como alteração de senha e autenticação
 
-Entre a camada de apresentação e a de domínio, implementei uma camada de DTOs (`UserRequest`, `UserResponse`, `UserUpdateRequest`, `PasswordChangeRequest`) que protege as entidades de domínio (`User`, `Address`) de exposição direta na API. A transformação entre DTOs e entidades é realizada pelo `UserMapper`, componente que centraliza essa lógica de conversão. Essa decisão de design evita acoplamento entre o contrato da API e a estrutura interna do banco de dados, facilitando futuras evoluções sem quebrar contratos já estabelecidos.
+**Camada de Infraestrutura:**
+- Repositórios JPA (`UserRepository`) para acesso a dados
+- Configurações (`OpenApiConfig`, `WebConfig`, `SecurityConfig`)
+- Interceptadores (`AuthInterceptor` para V1) e filtros (`JwtAuthenticationFilter` para V2)
+- Tratamento de exceções através do `GlobalExceptionHandler`, que converte todas as exceções em objetos `ProblemDetail` conforme o RFC 7807
 
-Para padronização de respostas de erro, implementei o tratamento de exceções através do `GlobalExceptionHandler`, que converte todas as exceções em objetos `ProblemDetail` conforme o RFC 7807. Isso garante que qualquer erro retornado pela API siga um formato consistente com os campos `type`, `title`, `status`, `detail` e propriedades customizadas. Exceções de domínio como `DomainValidationException` e `ResourceNotFoundException` são capturadas e transformadas em respostas HTTP apropriadas.
+**Tecnologias Utilizadas:**
+- **Spring Boot 4.0.1**: Framework principal com autoconfiguração e gestão de dependências
+- **Java 21**: Linguagem de programação LTS com recursos modernos
+- **PostgreSQL 16**: Banco de dados relacional com suporte ACID
+- **Spring Data JPA/Hibernate**: ORM para persistência de dados
+- **Spring Security**: Framework de segurança para autenticação JWT (V2)
+- **jBCrypt**: Biblioteca para hashing seguro de senhas
+- **JWT (jjwt v0.12.5)**: Autenticação stateless na V2
+- **SpringDoc OpenAPI 3**: Documentação automática da API via Swagger UI
+- **Bean Validation**: Validações de entrada nos DTOs
+- **Docker e Docker Compose**: Containerização da aplicação e banco de dados
+- **JaCoCo**: Análise de cobertura de código (meta mínima de 80%)
+- **JUnit 5**: Framework de testes automatizados
 
-A aplicação suporta duas versões de autenticação coexistentes. A versão 1 (V1) utiliza autenticação stateful baseada em `HttpSession`, implementada manualmente através do `AuthInterceptor` que intercepta requisições e verifica a existência de sessão válida. A versão 2 (V2) migra para autenticação stateless usando JWT (JSON Web Tokens) gerenciada pelo Spring Security através da classe `SecurityConfig` e do filtro `JwtAuthenticationFilter`. Essa coexistência permite migração gradual sem impactar clientes existentes.
+A aplicação suporta duas versões de autenticação coexistentes. A versão 1 (V1) utiliza autenticação stateful baseada em `HttpSession`, implementada manualmente através do `AuthInterceptor`. A versão 2 (V2) migra para autenticação stateless usando JWT (JSON Web Tokens) gerenciada pelo Spring Security através da classe `SecurityConfig` e do filtro `JwtAuthenticationFilter`. Essa coexistência permite migração gradual sem impactar clientes existentes.
 
 ### Estrutura do Projeto
-
-A organização do código segue uma estrutura modular que reflete a arquitetura em camadas adotada. O projeto está organizado no diretório `food-backend/` e segue o padrão Maven de estrutura de diretórios. A seguir, apresento a estrutura completa do projeto:
 
 ```
 food-backend/
@@ -69,586 +71,592 @@ food-backend/
 │   │   ├── java/com/thiagoferreira/food_backend/
 │   │   │   ├── Application.java                    # Classe principal da aplicação
 │   │   │   ├── controllers/                        # Controladores REST
-│   │   │   │   ├── AuthController.java             # Autenticação V1 (HttpSession)
-│   │   │   │   ├── AuthControllerV2.java           # Autenticação V2 (JWT)
-│   │   │   │   ├── UserController.java             # Gerenciamento de usuários V1
-│   │   │   │   └── UserControllerV2.java           # Gerenciamento de usuários V2
+│   │   │   │   ├── AuthController.java             # Implementação autenticação V1 (HttpSession)
+│   │   │   │   ├── AuthControllerApi.java          # Interface autenticação V1
+│   │   │   │   ├── AuthControllerV2.java           # Implementação autenticação V2 (JWT)
+│   │   │   │   ├── AuthControllerV2Api.java        # Interface autenticação V2
+│   │   │   │   ├── UserController.java             # Implementação usuários V1
+│   │   │   │   ├── UserControllerApi.java          # Interface usuários V1
+│   │   │   │   ├── UserControllerV2.java           # Implementação usuários V2
+│   │   │   │   └── UserControllerV2Api.java        # Interface usuários V2
 │   │   │   ├── interceptors/                       # Interceptadores HTTP
 │   │   │   │   └── AuthInterceptor.java            # Interceptor de autenticação V1
 │   │   │   ├── domain/
 │   │   │   │   ├── dto/                            # Data Transfer Objects
-│   │   │   │   │   ├── AddressDTO.java
-│   │   │   │   │   ├── LoginRequest.java
-│   │   │   │   │   ├── PasswordChangeRequest.java
-│   │   │   │   │   ├── ProblemDetailDTO.java
-│   │   │   │   │   ├── TokenResponse.java
-│   │   │   │   │   ├── UserRequest.java
-│   │   │   │   │   ├── UserResponse.java
-│   │   │   │   │   └── UserUpdateRequest.java
 │   │   │   │   ├── entities/                       # Entidades JPA
-│   │   │   │   │   ├── Address.java
-│   │   │   │   │   └── User.java
 │   │   │   │   └── enums/                          # Enumeradores
-│   │   │   │       ├── ErrorMessages.java
-│   │   │   │       └── UserType.java
 │   │   │   ├── exceptions/                         # Tratamento de exceções
-│   │   │   │   ├── DomainValidationException.java
-│   │   │   │   ├── GlobalExceptionHandler.java
-│   │   │   │   ├── ResourceNotFoundException.java
-│   │   │   │   └── UnauthorizedException.java
 │   │   │   ├── infraestructure/
 │   │   │   │   ├── config/                         # Configurações
-│   │   │   │   │   ├── OpenApiConfig.java          # Configuração do Swagger/OpenAPI
-│   │   │   │   │   └── WebConfig.java              # Configuração web (interceptors)
 │   │   │   │   ├── repositories/                   # Repositórios JPA
-│   │   │   │   │   └── UserRepository.java
 │   │   │   │   └── security/                       # Configurações de segurança V2
-│   │   │   │       ├── JwtAuthenticationFilter.java
-│   │   │   │       ├── JwtService.java
-│   │   │   │       ├── SecurityConfig.java
-│   │   │   │       ├── SecurityProblemDetailAccessDeniedHandler.java
-│   │   │   │       ├── SecurityProblemDetailEntryPoint.java
-│   │   │   │       └── UserDetailsServiceImpl.java
 │   │   │   ├── mappers/                            # Mappers DTO/Entity
-│   │   │   │   └── UserMapper.java
 │   │   │   └── services/                           # Lógica de negócio
-│   │   │       └── UserService.java
 │   │   └── resources/
 │   │       └── application.properties               # Configurações da aplicação
 │   └── test/                                       # Testes automatizados
-│       └── java/com/thiagoferreira/food_backend/
-│           ├── controllers/
-│           ├── exceptions/
-│           ├── infraestructure/
-│           ├── interceptors/
-│           ├── mappers/
-│           └── services/
 ├── docker-compose.yml                              # Configuração Docker Compose
 ├── Dockerfile                                      # Imagem Docker
-├── pom.xml                                         # Configuração Maven
-└── README.md                                       # Documentação do projeto
+└── pom.xml                                         # Configuração Maven
 ```
 
-Esta estrutura organiza o código seguindo os princípios de separação de responsabilidades e modularidade:
+### Diagrama da Arquitetura
 
-- **`controllers/`**: Contém os controladores REST separados por versão (V1 e V2), cada um implementando seus respectivos endpoints e tipos de autenticação
-- **`domain/`**: Agrupa as classes de domínio em subpacotes (`dto`, `entities`, `enums`), mantendo as entidades JPA separadas dos DTOs que expõem a API
-- **`services/`**: Contém a lógica de negócio isolada dos controllers, facilitando reutilização e testes
-- **`infraestructure/`**: Separa aspectos técnicos da infraestrutura (`config`, `repositories`, `security`) das regras de negócio, seguindo o princípio de Inversão de Dependências
-- **`exceptions/`**: Centraliza o tratamento de exceções e define exceções customizadas de domínio
-- **`mappers/`**: Centraliza a lógica de transformação entre DTOs e entidades, evitando acoplamento
-- **`interceptors/`**: Contém interceptadores HTTP específicos para a autenticação V1
+A arquitetura em camadas pode ser visualizada através da seguinte estrutura:
 
-A separação entre V1 e V2 está presente principalmente nos controllers, mantendo o restante do código (services, repositories, entities) compartilhado entre as duas versões. Isso demonstra que a coexistência de duas versões de autenticação não resultou em duplicação de código de negócio, apenas na camada de apresentação.
+```
+┌─────────────────────────────────────────────────────────┐
+│              Camada de Apresentação                     │
+│  Controllers (V1/V2) → Interfaces API → Documentação    │
+└───────────────────┬─────────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────────────────────┐
+│              Camada de Domínio                          │
+│     DTOs ↔ UserMapper ↔ Entities (JPA)                  │
+└───────────────────┬─────────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────────────────────┐
+│            Camada de Serviços                           │
+│         UserService (Lógica de Negócio)                 │
+└───────────────────┬─────────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────────────────────┐
+│          Camada de Infraestrutura                       │
+│  Repositories → JPA/Hibernate → PostgreSQL              │
+│  Security (JWT Filter / Session Interceptor)            │
+│  Exception Handler (ProblemDetail)                      │
+└─────────────────────────────────────────────────────────┘
+```
 
-## 2. Modelagem de Dados e Entidades
+#### Diagrama Visual da Arquitetura
 
-O modelo de dados foi projetado com foco nas necessidades específicas de um sistema de gestão de restaurantes. A entidade principal `User`, mapeada para a tabela `tb_users`, concentra as informações de usuários do sistema. O campo `email` foi definido como único (`@Column(unique = true)`) na entidade para evitar duplicidade de cadastro a nível de banco, complementando a validação de negócio no `UserService.createUser()` que verifica a existência prévia através do `UserRepository.existsByEmail()`. A mesma estratégia foi aplicada ao campo `login`, garantindo que cada usuário tenha um identificador único.
+O diagrama visual abaixo ilustra a arquitetura completa do sistema, incluindo as camadas, componentes principais e fluxo de dados. Este diagrama foi gerado utilizando o DiagramGPT da Eraser.
 
-A entidade `Address` foi implementada como `@Embeddable`, permitindo que seja incorporada diretamente na tabela `tb_users` sem necessidade de uma tabela separada. Essa decisão simplifica a persistência e consultas, já que endereço não possui identidade própria e está sempre associado a um usuário específico. Os campos `street`, `number`, `city` e `zipCode` compõem a estrutura básica necessária para entrega e localização.
+![Diagrama da Arquitetura do Sistema](assets/diagram/diagrama.png)
 
-O enum `UserType` define dois tipos de usuário: `OWNER` (proprietário do restaurante) e `CUSTOMER` (cliente). Essa distinção permite futuras expansões de regras de negócio específicas por perfil sem necessidade de refatoração estrutural.
+*Nota: Diagrama gerado utilizando o DiagramGPT da Eraser (https://eraser.io)*
 
-Para auditoria temporal, a entidade `User` utiliza JPA Auditing (`@EnableJpaAuditing` na classe `Application`) para preencher automaticamente os campos `createdAt` e `lastUpdated`. O `createdAt` é marcado como `updatable = false` para garantir que nunca seja alterado após a criação, enquanto `lastUpdated` é atualizado automaticamente pelo Hibernate a cada modificação.
+#### Estrutura do Banco de Dados PostgreSQL
 
-Escolhemos PostgreSQL como banco de dados relacional porque o modelo de dados é altamente estruturado, com relacionamentos claros e necessidade de garantias ACID. A integridade referencial e transações são fundamentais para operações críticas como criação de usuário (onde validamos email/login únicos) e alteração de senha (onde validamos senha atual antes de atualizar). O Hibernate foi configurado com `spring.jpa.hibernate.ddl-auto=update` para desenvolvimento, permitindo evolução do schema automaticamente baseado nas entidades, enquanto mantemos `spring.jpa.open-in-view=false` para evitar problemas de lazy loading em contextos fora de transação.
-
-Durante o desenvolvimento, utilizei o DBeaver para visualizar e validar a estrutura do banco de dados PostgreSQL. A figura abaixo mostra a estrutura da tabela `tb_users` criada pelo Hibernate, onde podemos observar todos os campos da entidade `User`, incluindo os campos de endereço incorporados e os campos de auditoria (`created_at` e `last_updated`).
-
-
-#### Estrutura do Banco de Dados PostgreSQL - DBeaver
 ![Estrutura do Banco de Dados PostgreSQL - DBeaver](assets/dbeaver/postgres.png)
 
-## 3. API e Endpoints
-
-A API está organizada em duas versões principais que coexistem na mesma aplicação. A versão 1 (`/v1/**`) utiliza autenticação baseada em sessão HTTP, enquanto a versão 2 (`/v2/**`) migra para JWT através do Spring Security.
-
-O fluxo principal de gerenciamento de usuários na V1 inicia com o cadastro público através de `POST /v1/users`, que não requer autenticação. Após cadastro, o usuário autentica-se via `POST /auth/login`, que cria uma sessão HTTP e armazena o ID do usuário no atributo `USER_ID`. Com sessão válida, o usuário pode listar todos os usuários (`GET /v1/users`), buscar por ID (`GET /v1/users/{id}`), realizar buscas por nome (`GET /v1/users/search/name?name={nome}`), por login (`GET /v1/users/search/login?login={login}`) ou por email (`GET /v1/users/search/email?email={email}`). A busca por nome utiliza o método `findByNameContainingIgnoreCaseOrderByNameAsc` do repositório, que realiza correspondência parcial case-insensitive e ordena alfabeticamente.
-
-**Ponto crítico de segurança:** Separei explicitamente a atualização de dados cadastrais da alteração de senha em rotas distintas. O endpoint `PUT /v1/users/{id}` (e `PUT /v2/users/{id}` na V2) aceita apenas `UserUpdateRequest` contendo `name` e `address`, sendo que o método `updateEntityFromDto` do `UserMapper` intencionalmente não processa campos de senha. A alteração de senha é realizada exclusivamente através de `PATCH /v1/users/{id}/password` (e `PATCH /v2/users/{id}/password` na V2), que requer `PasswordChangeRequest` com `currentPassword` e `newPassword`. O `UserService.changePassword()` valida a senha atual usando `BCrypt.checkpw()` antes de aplicar a nova senha, garantindo que apenas o próprio usuário autenticado possa alterar sua senha com conhecimento da senha atual. Essa separação evita que campos de senha sejam acidentalmente expostos em payloads de atualização cadastral e permite políticas de segurança distintas para cada operação.
-
-Na versão 2, o fluxo de autenticação utiliza JWT. O endpoint público `POST /v2/auth/login` autentica o usuário através do `UserService.authenticate()` e retorna um token JWT gerado pelo `JwtService.generateToken()`. O token é encapsulado em um `TokenResponse` no formato `{"token": "...", "type": "Bearer"}`. Para acessar endpoints protegidos da V2, o cliente deve incluir o header `Authorization: Bearer {token}`. O `JwtAuthenticationFilter` intercepta requisições para `/v2/**`, extrai e valida o token antes de permitir o acesso aos controllers.
-
-O endpoint `POST /v2/auth/logout` permite que o usuário faça logout. Como JWT tokens são stateless por natureza, o logout não invalida o token no servidor (diferente do logout V1 que invalida a sessão HTTP). O endpoint simplesmente retorna 200 OK, sinalizando ao cliente que ele deve descartar o token localmente. Esta é uma abordagem comum em sistemas stateless, onde o token permanece válido até sua expiração natural (configurável através da propriedade `jwt.expiration`). Em produção, para maior segurança, pode-se implementar uma blacklist de tokens invalidados, armazenando os tokens em cache (Redis, por exemplo) e verificando sua presença durante a validação no `JwtAuthenticationFilter`.
-
-A exclusão de usuários é realizada através de `DELETE /v1/users/{id}` ou `DELETE /v2/users/{id}`, que invoca `UserService.deleteUser()` que verifica existência antes de remover, lançando `ResourceNotFoundException` se o ID não existir.
-
-## 4. Documentação e Testabilidade
-
-A API segue a especificação OpenAPI 3.0 para documentação automática, configurada através da classe `OpenApiConfig`. Utilizei o SpringDoc OpenAPI 2.7.0 que gera automaticamente a documentação interativa acessível em `/swagger-ui.html`. A configuração separa as APIs em dois grupos: "v1" (para endpoints `/v1/**` e `/auth/**`) e "v2" (para endpoints `/v2/**`), cada um com suas próprias descrições contextualizando o tipo de autenticação utilizado.
-
-Os controllers são anotados com `@Tag` para organização no Swagger, e cada endpoint possui `@Operation` com `summary` e `description` detalhados. As respostas são documentadas através de `@ApiResponses` que especificam códigos HTTP e esquemas de resposta, incluindo os casos de erro que retornam `ProblemDetailDTO`. Para os endpoints V2, adicionei `@SecurityRequirement(name = "bearerAuth")` que integra o botão de autenticação no Swagger UI, permitindo que desenvolvedores testem endpoints protegidos diretamente na interface.
-
-### Documentação Swagger - Versão 1
-
-A documentação da API versão 1 está organizada no Swagger UI, mostrando todos os endpoints disponíveis com autenticação baseada em sessão HTTP. As imagens abaixo mostram algumas das principais visualizações da documentação:
-
-#### Swagger V1 - Visão geral
-![Swagger V1 - Visão geral](assets/swagger/v1/evidencia_1.png)
-
-#### Swagger V1 - Endpoints de usuários
-![Swagger V1 - Endpoints de usuários](assets/swagger/v1/evidencia_2.png)
-
-#### Swagger V1 - Detalhes do endpoint de criação
-![Swagger V1 - Detalhes do endpoint de criação](assets/swagger/v1/evidencia_3.png)
-
-#### Swagger V1 - Endpoints de autenticação
-![Swagger V1 - Endpoints de autenticação](assets/swagger/v1/evidencia_4.png)
-
-#### Swagger V1 - Endpoints de busca
-![Swagger V1 - Endpoints de busca](assets/swagger/v1/evidencia_5.png)
-
-#### Swagger V1 - Respostas de erro
-![Swagger V1 - Respostas de erro](assets/swagger/v1/evidencia_6.png)
-
-#### Swagger V1 - Schema de resposta
-![Swagger V1 - Schema de resposta](assets/swagger/v1/evidencia_7.png)
-
-### Documentação Swagger - Versão 2
-
-A versão 2 da API utiliza autenticação JWT e está documentada separadamente no Swagger. As imagens abaixo ilustram a documentação dos endpoints V2, incluindo o recurso de autenticação Bearer Token:
-
-#### Swagger V2 - Visão geral
-![Swagger V2 - Visão geral](assets/swagger/v2/evidencia_1.png)
-
-#### Swagger V2 - Autenticação JWT
-![Swagger V2 - Autenticação JWT](assets/swagger/v2/evidencia_2.png)
-
-#### Swagger V2 - Autenticação JWT
-![Swagger V2 - Autenticação JWT](assets/swagger/v2/evidencia_3.png)
-
-#### Swagger V2 - Detalhes do endpoint
-![Swagger V2 - Detalhes do endpoint](assets/swagger/v2/evidencia_4.png)
-
-#### Swagger V2 - Respostas de erro
-![Swagger V2 - Respostas de erro](assets/swagger/v2/evidencia_5.png)
-
-#### Swagger V2 - Schemas
-![Swagger V2 - Schemas](assets/swagger/v2/evidencia_6.png)
-
-Para validação sistemática dos cenários de borda, criei uma coleção completa do Postman (`Food_Backend_ProblemDetail_Tests.postman_collection.json`) que cobre diversos casos de teste, incluindo login inválido (retorna 404 com ProblemDetail), tentativa de cadastro com email duplicado (retorna 400 com ProblemDetail), requisições sem autenticação em endpoints protegidos (retorna 401), validações de campos obrigatórios, e fluxos completos de CRUD. A coleção utiliza variáveis de ambiente (`{{base_url}}`, `{{user_id}}`, `{{jwt_token}}`) para facilitar execução em diferentes ambientes.
-
-A coleção está organizada em pastas que seguem a estrutura dos testes, facilitando a navegação e execução dos cenários. Durante o desenvolvimento, testei todos os endpoints manualmente através do Postman para garantir que as respostas de erro seguem o padrão RFC 7807 (Problem Details). A seguir, apresento alguns exemplos dos testes realizados:
-
-### Testes de Autenticação
-
-Os testes de autenticação validam o fluxo de login e logout, tanto na versão 1 (sessão HTTP) quanto na versão 2 (JWT). Alguns exemplos:
-
-#### Login com sucesso
-![Postman - Login com sucesso](assets/postman/0-Autenticacao/POST-Login_(sucesso).png)
-
-#### Acesso não autorizado após logout
-![Postman - Acesso não autorizado após logout](assets/postman/0-Autenticacao/GET-Acesso_nao_autorizado_(apos_logout).png)
-
-#### Acesso não autorizado sem login
-![Postman - Acesso não autorizado (sem login)](assets/postman/0-Autenticacao/GET-Acesso_nao_autorizado_(sem_login).png)
-
-#### Login senha incorreta
-![Postman - Login senha incorreta](assets/postman/0-Autenticacao/POST-Login_(senha_incorreta).png)
-
-#### Login com usuário não encontrado
-![Postman - Login com usuário não encontrado](assets/postman/0-Autenticacao/POST-Login_(usuario_nao_encontrado).png)
-
-#### Login com validação de login vazio
-![Postman - Login com validação de login vazio](assets/postman/0-Autenticacao/POST-Login_(validacao_-_login_vazio).png)
-
-#### Login com validação de senha vazia
-![Postman - Login com validação de senha vazia](assets/postman/0-Autenticacao/POST-Login_(validacao_-_senha_vazia).png)
-
-#### Logout
-![Postman - Logout](assets/postman/0-Autenticacao/POST-Logout.png)
-
-### Testes de Erro - ResourceNotFoundException (404)
-
-Estes testes validam que a API retorna corretamente o status 404 quando um recurso não é encontrado:
-
-#### Buscar usuário por ID inexistente
-![Postman - Buscar usuário inexistente por ID](assets/postman/1-ResourceNotFoundException_404/GET-Buscar_usuario_por_ID_inexistente.png)
-
-#### Buscar usuário por email inexistente
-![Postman - Buscar usuário inexistente por email](assets/postman/1-ResourceNotFoundException_404/GET-Buscar_usuario_por_email_inexistente.png)
-
-#### Buscar usuário por login inexistente
-![Postman - Buscar usuário inexistente por login](assets/postman/1-ResourceNotFoundException_404/GET-Buscar_usuario_por_login_inexistente.png)
-
-#### Deletar usuário inexistente
-![Postman - Deletar usuário inexistente](assets/postman/1-ResourceNotFoundException_404/DELETE-Deletar_usuario_inexistente.png)
-
-#### Atualizar usuário inexistente
-![Postman - Atualizar usuário inexistente](assets/postman/1-ResourceNotFoundException_404/PUT-Atualizar_usuario_inexistente.png)
-
-#### Alterar senha de usuário inexistente
-![Postman - Alterar senha de usuário inexistente](assets/postman/1-ResourceNotFoundException_404/PATCH-Alterar_senha_usuario_inexistente.png)
-
-### Testes de Erro - DomainValidationException (400)
-
-Estes testes validam regras de negócio que retornam 400:
-
-#### Criar usuário com email duplicado
-![Postman - Email duplicado](assets/postman/2-DomainValidationException_400/POST-Criar_usuario_com_email_duplicado.png)
-
-#### Alterar senha com senha atual igual a senha nova
-![Postman - Alterar senha com senha atual igual a senha nova](assets/postman/2-DomainValidationException_400/PATCH-Alterar_senha__(senha_atual_igual_nova_senha).png)
-
-### Testes de Erro - MethodArgumentNotValidException (400)
-
-Estes testes validam as validações de entrada dos DTOs:
-
-#### Alterar senha com campos vazios
-![Postman - Alterar senha com campos vazios](assets/postman/3-MethodArgumentNotValidException_400/PATCH-Alterar_senha_(campos_vazios).png)
-
-#### Alterar senha com nova senha muito curta
-![Postman - Alterar senha com nova senha muito curta](assets/postman/3-MethodArgumentNotValidException_400/PATCH-Alterar_senha_(nova_senha_muito_curta).png)
-
-#### Criar usuário com body vazio
-![Postman - Criar usuário com body vazio](assets/postman/3-MethodArgumentNotValidException_400/POST-Criar_usuario_(body_vazio).png)
-
-#### Criar usuário com email inválido
-![Postman - Criar usuário com email inválido](assets/postman/3-MethodArgumentNotValidException_400/POST-Criar_usuario_(email_invalido).png)
-
-#### Criar usuário com múltiplos campos inválidos
-![Postman - Criar usuário com múltiplos campos inválidos](assets/postman/3-MethodArgumentNotValidException_400/POST-Criar_usuario_(multiplos_campos_invalidos).png)
-
-#### Criar usuário com name vazio
-![Postman - Criar usuário com name vazio](assets/postman/3-MethodArgumentNotValidException_400/POST-Criar_usuario_(name_vazio).png)
-
-#### Criar usuário com senha muito curta
-![Postman - Criar usuário com senha muito curta](assets/postman/3-MethodArgumentNotValidException_400/POST-Criar_usuario_(senha_muito_curta).png)
-
-#### Atualizar usuário com name vazio
-![Postman - Atualizar usuário com name vazio](assets/postman/3-MethodArgumentNotValidException_400/PUT-Atualizar_usuario_(name_vazio).png)
-
-### Outros Testes de Erro
-
-Estes testes validam o tratamento de erros adicionais relacionados a requisições malformadas, endpoints inexistentes, tipos de conteúdo não suportados e outros cenários de erro:
-
-#### Endpoint inexistente (GET)
-![Postman - Endpoint inexistente (GET)](assets/postman/4-Novos_Tratamentos_de_Erro/GET-Endpoint_inexistente.png)
-
-#### Endpoint inexistente (POST)
-![Postman - Endpoint inexistente (POST)](assets/postman/4-Novos_Tratamentos_de_Erro/POST-Endpoint_inexistente.png)
-
-#### ID com tipo inválido (string) - GET
-![Postman - ID com tipo inválido (string) - GET](assets/postman/4-Novos_Tratamentos_de_Erro/GET-ID_com_tipo_invalido_(string).png)
-
-#### ID com tipo inválido - PUT
-![Postman - ID com tipo inválido - PUT](assets/postman/4-Novos_Tratamentos_de_Erro/PUT-ID_com_tipo_invalido.png)
-
-#### Parâmetro email faltando
-![Postman - Parâmetro email faltando](assets/postman/4-Novos_Tratamentos_de_Erro/GET-Parametro_email_faltando.png)
-
-#### Parâmetro login faltando
-![Postman - Parâmetro login faltando](assets/postman/4-Novos_Tratamentos_de_Erro/GET-Parametro_login_faltando.png)
-
-#### Parâmetro name faltando
-![Postman - Parâmetro name faltando](assets/postman/4-Novos_Tratamentos_de_Erro/GET-Parametro_name_faltando.png)
-
-#### Body vazio quando obrigatório
-![Postman - Body vazio quando obrigatório](assets/postman/4-Novos_Tratamentos_de_Erro/POST-Body_vazio_quando_obrigatorio.png)
-
-#### Content-Type não suportado (XML) - POST
-![Postman - Content-Type não suportado (XML) - POST](assets/postman/4-Novos_Tratamentos_de_Erro/POST-Content-Type_nao_suportado_(XML).png)
-
-#### Content-Type não suportado (text/plain) - PUT
-![Postman - Content-Type não suportado (text/plain) - PUT](assets/postman/4-Novos_Tratamentos_de_Erro/PUT-Content-Type_nao_suportado_(text:plain).png)
-
-#### JSON malformado
-![Postman - JSON malformado](assets/postman/4-Novos_Tratamentos_de_Erro/POST-JSON_malformado.png)
-
-#### Método HTTP não suportado (tentar POST em GET)
-![Postman - Método HTTP não suportado (tentar POST em GET)](assets/postman/4-Novos_Tratamentos_de_Erro/POST-Metodo_HTTP_nao_suportado_(tentar_POST_em_GET).png)
-
-### Testes de Casos de Sucesso
-
-Os testes de casos de sucesso validam que os endpoints funcionam corretamente quando recebem dados válidos:
-
-#### Criar usuário válido (endpoint público)
-![Postman - Criar usuário válido (endpoint público)](assets/postman/5-Casos_de_Sucesso/POST-Criar_usuario_valido_(publico).png)
-
-#### Login (antes de acessar endpoints protegidos)
-![Postman - Login (antes de acessar endpoints protegidos)](assets/postman/5-Casos_de_Sucesso/POST-Login_(antes_de_acessar_endpoints_protegidos).png)
-
-#### Listar todos os usuários
-![Postman - Listar todos os usuários](assets/postman/5-Casos_de_Sucesso/GET-Listar_todos_os_usuarios.png)
-
-#### Buscar usuário por ID
-![Postman - Buscar usuário por ID](assets/postman/5-Casos_de_Sucesso/GET-Buscar_usuario_por_ID.png)
-
-#### Buscar usuário por nome
-![Postman - Buscar usuário por nome](assets/postman/5-Casos_de_Sucesso/GET-Buscar_usuario_por_nome.png)
-
-#### Buscar usuário por email
-![Postman - Buscar usuário por email](assets/postman/5-Casos_de_Sucesso/GET-Buscar_usuario_por_email.png)
-
-#### Buscar usuário por login
-![Postman - Buscar usuário por login](assets/postman/5-Casos_de_Sucesso/GET-Buscar_usuario_por_login.png)
-
-#### Atualizar usuário
-![Postman - Atualizar usuário](assets/postman/5-Casos_de_Sucesso/PUT-Atualizar_usuario.png)
-
-#### Alterar senha
-![Postman - Alterar senha](assets/postman/5-Casos_de_Sucesso/PATCH-Alterar_senha.png)
-
-#### Deletar usuário
-![Postman - Deletar usuário](assets/postman/5-Casos_de_Sucesso/DELETE-Deletar_usuario.png)
-
-### Testes V2 - Autenticação JWT
-
-A versão 2 utiliza autenticação JWT através do Spring Security. Os testes estão organizados em três categorias principais que validam o fluxo completo de autenticação, casos de sucesso e tratamento de erros.
-
-#### Autenticação V2
-
-Os testes de autenticação V2 validam o fluxo de login e logout com JWT, além de cenários de acesso não autorizado:
-
-##### Login V2 com sucesso
-![Postman - Login V2 com sucesso](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/POST_-_Login_V2_(sucesso).png)
-
-##### Login V2 com usuário não encontrado
-![Postman - Login V2 com usuário não encontrado](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/POST_-_Login_V2_(usuario_nao_encontrado).png)
-
-##### Login V2 com senha incorreta
-![Postman - Login V2 com senha incorreta](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/POST_-_Login_V2_(senha_incorreta).png)
-
-##### Acesso não autorizado V2 sem token
-![Postman - Acesso não autorizado V2 sem token](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/GET_-_Acesso_nao_autorizado_V2_(sem_token).png)
-
-##### Acesso não autorizado V2 com token inválido
-![Postman - Acesso não autorizado V2 com token inválido](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/GET_-_Acesso_nao_autorizado_V2_(token_invalido).png)
-
-##### Logout V2 com sucesso
-![Postman - Logout V2 com sucesso](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/POST_-_Logout_V2_(sucesso).png)
-
-##### Logout V2 sem token (erro 401)
-![Postman - Logout V2 sem token (erro 401)](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.1-Autenticacao_V2/POST_-_Logout_V2_(sem_token_-_erro_401).png)
-
-#### Casos de Sucesso V2
-
-Os testes de casos de sucesso V2 validam que os endpoints protegidos funcionam corretamente quando autenticados com JWT:
-
-##### Criar usuário V2 (endpoint público)
-![Postman - Criar usuário V2 (endpoint público)](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.2-Casos_de_Sucesso_V2/POST_-_Criar_usuario_V2_(publico).png)
-
-##### Listar todos os usuários V2
-![Postman - Listar todos os usuários V2](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.2-Casos_de_Sucesso_V2/GET_-_Listar_todos_os_usuarios_V2.png)
-
-##### Buscar usuário por ID V2
-![Postman - Buscar usuário por ID V2](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.2-Casos_de_Sucesso_V2/GET_-_Buscar_usuario_por_ID_V2.png)
-
-##### Buscar usuários por nome V2
-![Postman - Buscar usuários por nome V2](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.2-Casos_de_Sucesso_V2/GET_-_Buscar_usuarios_por_nome_V2.png)
-
-##### Atualizar usuário V2
-![Postman - Atualizar usuário V2](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.2-Casos_de_Sucesso_V2/PUT_-_Atualizar_usuario_V2.png)
-
-#### Erros V2 (ProblemDetail)
-
-Os testes de erros V2 validam que os erros retornados seguem o padrão RFC 7807 (ProblemDetail):
-
-##### Criar usuário V2 com email duplicado
-![Postman - Criar usuário V2 com email duplicado](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.3-Erros_V2_(ProblemDetail)/POST_-_Criar_usuario_V2_(email_duplicado).png)
-
-##### Criar usuário V2 com validação (campos inválidos)
-![Postman - Criar usuário V2 com validação (campos inválidos)](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.3-Erros_V2_(ProblemDetail)/POST_-_Criar_usuario_V2_(validacao_-_campos_invalidos).png)
-
-##### Usuário inexistente V2
-![Postman - Usuário inexistente V2](assets/postman/6-Endpoints_V2_-_JWT_Authentication/6.3-Erros_V2_(ProblemDetail)/GET_-_Usuario_inexistente_V2.png)
-
-### Testes Automatizados e Cobertura de Código (JaCoCo)
-
-A aplicação possui uma suíte completa de testes automatizados organizados no pacote `src/test/java` seguindo a estrutura do código de produção. Os testes incluem testes unitários para services (`UserService`), controllers (`UserControllerV2Test`, `AuthControllerV2Test`), mappers (`UserMapper`), interceptors (`AuthInterceptorTest`), configurações (`OpenApiConfigTest`), filtros de segurança (`JwtAuthenticationFilterTest`) e handlers de exceção (`GlobalExceptionHandlerTest`). O Maven Surefire Plugin executa os testes durante o build, garantindo que todas as alterações no código sejam validadas automaticamente.
-
-Para garantir a qualidade do código e identificar áreas não testadas, implementei a análise de cobertura de código utilizando o **JaCoCo (Java Code Coverage)** versão 0.8.11. O JaCoCo é configurado através do plugin Maven `jacoco-maven-plugin` no `pom.xml` com três execuções principais:
-
-**1. Prepare Agent (`prepare-agent`):**
-- Configurado para instrumentar as classes durante a execução dos testes
-- Exclui classes do sistema (`sun/**`, `jdk/**`, `java/**`, `com/sun/**`) e a classe principal da aplicação (`Application.class`) da análise de cobertura, focando apenas no código de negócio
-
-**2. Report (`report`):**
-- Executado na fase `test` do Maven
-- Gera relatórios HTML detalhados em `target/site/jacoco/` com métricas de cobertura por classe, método e linha
-- Os relatórios incluem informações sobre instruções, branches, linhas, métodos e classes cobertas
-
-**3. Check (`jacoco-check`):**
-- Valida se a cobertura de código atende aos critérios mínimos estabelecidos
-- Configurado com meta mínima de **80% de cobertura de linhas** (`COVEREDRATIO` de 0.80) para o bundle completo
-- O build falha se a cobertura ficar abaixo do mínimo, garantindo que novos códigos mantenham ou melhorem a qualidade
-
-Durante o desenvolvimento, executei os testes e gerei os relatórios de cobertura para validar que todas as funcionalidades críticas estão adequadamente testadas. A figura abaixo mostra o relatório de cobertura do JaCoCo, onde podemos observar a cobertura geral do projeto e os detalhes por pacote e classe.
-
-#### Relatório de Cobertura JaCoCo
-![Relatório de Cobertura JaCoCo](assets/jacoco/cobertura.png)
-
-A integração do JaCoCo com o ciclo de build garante que a qualidade do código seja mantida continuamente. Toda vez que os testes são executados através de `mvn test` ou `mvn clean package`, o JaCoCo coleta dados de cobertura, gera relatórios e valida se os critérios mínimos são atendidos. Isso permite identificar rapidamente áreas do código que precisam de testes adicionais e ajuda a manter a confiabilidade do sistema durante evoluções futuras.
-
-A suíte de testes implementada abrange diferentes tipos de testes para garantir a qualidade em múltiplas camadas:
-
-- **Testes unitários**: Testes isolados de componentes individuais como services, mappers e utilitários, utilizando mocks para isolar dependências
-- **Testes de integração**: Testes que utilizam o contexto completo do Spring Boot (`@SpringBootTest`) para validar interações entre componentes
-- **Testes de controladores**: Testes focados nos endpoints REST utilizando `MockMvc` para simular requisições HTTP e validar respostas, códigos de status e estrutura de dados
-- **Testes de serviços**: Testes da lógica de negócio isolada, validando regras de domínio e transformações de dados
-- **Testes de exceções**: Testes específicos para o tratamento de erros, garantindo que exceções são capturadas corretamente pelo `GlobalExceptionHandler` e convertidas em respostas `ProblemDetail` apropriadas
-
-## 5. Validações Implementadas
-
-A aplicação implementa um sistema abrangente de validações em múltiplas camadas para garantir a integridade e consistência dos dados. As validações são aplicadas tanto no nível de entrada (DTOs) quanto no nível de negócio (services), criando uma defesa em profundidade contra dados inválidos.
-
-### Validações de Entrada (Bean Validation)
-
-As validações de entrada são implementadas utilizando Bean Validation (JSR 303/380) através de anotações nos DTOs. O Spring Boot Starter Validation ativa automaticamente a validação e o `GlobalExceptionHandler` captura `MethodArgumentNotValidException`, convertendo-as em respostas `ProblemDetail` com detalhamento dos erros.
-
-**Validações implementadas nos DTOs:**
-
-- **Email**: Formato válido de email através de `@Email` e `@NotBlank`, garantindo que apenas endereços de email válidos sejam aceitos
-- **Password**: Mínimo de 6 caracteres através de `@Size(min = 6)`, assegurando senhas com complexidade mínima
-- **Campos obrigatórios**: Name, Email, Login, Password e UserType são marcados como `@NotBlank` ou `@NotNull`, garantindo que dados essenciais estejam presentes
-- **Tipos de dados**: Validações de tipo garantem que os dados recebidos correspondem aos tipos esperados (String, Enum, etc.)
-
-Essas validações são executadas automaticamente pelo Spring antes que a requisição chegue ao controller, retornando `400 Bad Request` com detalhes dos campos inválidos caso algum dado não atenda aos critérios.
-
-### Validações de Domínio (Business Rules)
-
-Além das validações de entrada, a aplicação implementa validações de negócio na camada de serviços, que garantem regras de domínio mais complexas:
-
-- **Unicidade de Email**: O `UserService.createUser()` verifica através de `UserRepository.existsByEmail()` se o email já está cadastrado antes de criar um novo usuário. Se duplicado, lança `DomainValidationException` com status 400
-- **Unicidade de Login**: Similarmente, o login é verificado através de `UserRepository.existsByLogin()` para garantir que cada usuário tenha um identificador único
-- **Validação de Senha na Alteração**: O método `UserService.changePassword()` valida que a senha atual fornecida corresponde à senha armazenada usando `BCrypt.checkpw()` antes de aplicar a nova senha. Também verifica que a senha atual e nova senha sejam diferentes, lançando `DomainValidationException` se forem iguais
-- **Existência de Recurso**: Operações de atualização, exclusão e busca por ID verificam a existência do usuário através de `UserRepository.findById()` antes de proceder, lançando `ResourceNotFoundException` (404) se o recurso não existir
-- **Autenticação de Senha**: No login, a senha fornecida é verificada contra o hash armazenado usando BCrypt, garantindo que apenas usuários com credenciais corretas possam autenticar
-
-Essas validações de domínio são críticas para manter a integridade dos dados e garantir que operações sensíveis (como alteração de senha) sejam realizadas apenas quando todas as condições de negócio são atendidas. A separação entre validações de entrada (formato e estrutura) e validações de domínio (regras de negócio) segue boas práticas de arquitetura, permitindo que cada camada tenha responsabilidades bem definidas.
-
-## 6. Guia de Infraestrutura (Docker)
-
-O projeto foi containerizado utilizando Docker e Docker Compose para facilitar a execução local e garantir consistência entre ambientes de desenvolvimento. O `docker-compose.yml` define dois serviços que trabalham em conjunto.
-
-Durante o desenvolvimento e testes, utilizei o Docker Desktop para gerenciar os containers e o IntelliJ IDEA para executar a aplicação quando necessário. As imagens abaixo mostram os containers em execução:
-
-#### Docker - Containers em execução no Docker Desktop
-![Docker - Containers em execução](assets/docker/evidencia_1.png)
-
-#### Docker - Detalhes dos containers no IntelliJ IDEA
-![Docker - Detalhes dos containers](assets/docker/evidencia_2.png)
-
-### Serviços Configurados
-
-**PostgreSQL (`postgres`):**
-- Imagem: `postgres:16-alpine` (versão leve e atualizada)
+## 3. Descrição dos Endpoints da API
+
+### Tabela de Endpoints
+
+#### Autenticação V1 (`/auth`)
+
+| Endpoint | Método | Descrição |
+| --- | --- | --- |
+| `/auth/login` | POST | Autenticar usuário e criar sessão HTTP (público) |
+| `/auth/logout` | POST | Encerrar sessão do usuário (requer autenticação) |
+
+#### Usuários V1 (`/v1/users`)
+
+| Endpoint | Método | Descrição |
+| --- | --- | --- |
+| `/v1/users` | POST | Criar novo usuário (público) |
+| `/v1/users` | GET | Listar todos os usuários (requer autenticação) |
+| `/v1/users/{id}` | GET | Buscar usuário por ID (requer autenticação) |
+| `/v1/users/search/name?name={nome}` | GET | Buscar usuários por nome - parâmetro opcional, se não fornecido retorna todos (requer autenticação) |
+| `/v1/users/search/login?login={login}` | GET | Buscar usuário por login (requer autenticação) |
+| `/v1/users/search/email?email={email}` | GET | Buscar usuário por email (requer autenticação) |
+| `/v1/users/{id}` | PUT | Atualizar informações do usuário - nome e endereço (requer autenticação) |
+| `/v1/users/{id}/password` | PATCH | Alterar senha do usuário (requer autenticação) |
+| `/v1/users/{id}` | DELETE | Deletar usuário (requer autenticação) |
+
+#### Autenticação V2 (`/v2/auth`)
+
+| Endpoint | Método | Descrição |
+| --- | --- | --- |
+| `/v2/auth/login` | POST | Autenticar usuário e obter token JWT (público) |
+| `/v2/auth/logout` | POST | Logout do usuário - descartar token (requer JWT) |
+
+#### Usuários V2 (`/v2/users`)
+
+| Endpoint | Método | Descrição |
+| --- | --- | --- |
+| `/v2/users` | POST | Criar novo usuário (público) |
+| `/v2/users` | GET | Listar todos os usuários (requer JWT) |
+| `/v2/users/{id}` | GET | Buscar usuário por ID (requer JWT) |
+| `/v2/users/search/name?name={nome}` | GET | Buscar usuários por nome - parâmetro opcional, se não fornecido retorna todos (requer JWT) |
+| `/v2/users/search/login?login={login}` | GET | Buscar usuário por login (requer JWT) |
+| `/v2/users/search/email?email={email}` | GET | Buscar usuário por email (requer JWT) |
+| `/v2/users/{id}` | PUT | Atualizar informações do usuário - nome e endereço (requer JWT) |
+| `/v2/users/{id}/password` | PATCH | Alterar senha do usuário (requer JWT) |
+| `/v2/users/{id}` | DELETE | Deletar usuário (requer JWT) |
+
+### Exemplos de Requisição e Resposta
+
+#### Criar Usuário (POST `/v1/users` ou `/v2/users`)
+
+**Requisição:**
+```json
+POST /v1/users
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "email": "joao@example.com",
+  "login": "joao123",
+  "password": "senha123",
+  "type": "CUSTOMER",
+  "address": {
+    "street": "Rua das Flores",
+    "number": "123",
+    "city": "São Paulo",
+    "zipCode": "01234-567"
+  }
+}
+```
+
+**Resposta (201 Created):**
+```json
+{
+  "id": 1,
+  "name": "João Silva",
+  "email": "joao@example.com",
+  "login": "joao123",
+  "type": "CUSTOMER",
+  "address": {
+    "street": "Rua das Flores",
+    "number": "123",
+    "city": "São Paulo",
+    "zipCode": "01234-567"
+  },
+  "createdAt": "2024-01-15T10:30:00",
+  "lastUpdated": "2024-01-15T10:30:00"
+}
+```
+
+#### Login V1 (POST `/auth/login`)
+
+**Requisição:**
+```json
+POST /auth/login
+Content-Type: application/json
+
+{
+  "login": "joao123",
+  "password": "senha123"
+}
+```
+
+**Resposta (200 OK):**  
+Sessão HTTP criada. O cliente deve manter o cookie `JSESSIONID` para acessar endpoints protegidos.
+
+#### Login V2 (POST `/v2/auth/login`)
+
+**Requisição:**
+```json
+POST /v2/auth/login
+Content-Type: application/json
+
+{
+  "login": "joao123",
+  "password": "senha123"
+}
+```
+
+**Resposta (200 OK):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "type": "Bearer"
+}
+```
+
+**Uso do Token:**  
+Incluir o token no header `Authorization: Bearer {token}` para acessar endpoints protegidos V2.
+
+#### Buscar Usuário por ID (GET `/v1/users/{id}` ou `/v2/users/{id}`)
+
+**Requisição:**
+```
+GET /v1/users/1
+```
+
+**Resposta (200 OK):**
+```json
+{
+  "id": 1,
+  "name": "João Silva",
+  "email": "joao@example.com",
+  "login": "joao123",
+  "type": "CUSTOMER",
+  "address": {
+    "street": "Rua das Flores",
+    "number": "123",
+    "city": "São Paulo",
+    "zipCode": "01234-567"
+  },
+  "createdAt": "2024-01-15T10:30:00",
+  "lastUpdated": "2024-01-15T10:30:00"
+}
+```
+
+#### Atualizar Usuário (PUT `/v1/users/{id}` ou `/v2/users/{id}`)
+
+**Requisição:**
+```json
+PUT /v1/users/1
+Content-Type: application/json
+
+{
+  "name": "João Silva Santos",
+  "address": {
+    "street": "Avenida Paulista",
+    "number": "1000",
+    "city": "São Paulo",
+    "zipCode": "01310-100"
+  }
+}
+```
+
+**Resposta (200 OK):**
+```json
+{
+  "id": 1,
+  "name": "João Silva Santos",
+  "email": "joao@example.com",
+  "login": "joao123",
+  "type": "CUSTOMER",
+  "address": {
+    "street": "Avenida Paulista",
+    "number": "1000",
+    "city": "São Paulo",
+    "zipCode": "01310-100"
+  },
+  "createdAt": "2024-01-15T10:30:00",
+  "lastUpdated": "2024-01-15T14:20:00"
+}
+```
+
+#### Alterar Senha (PATCH `/v1/users/{id}/password` ou `/v2/users/{id}/password`)
+
+**Requisição:**
+```json
+PATCH /v1/users/1/password
+Content-Type: application/json
+
+{
+  "currentPassword": "senha123",
+  "newPassword": "novaSenha456"
+}
+```
+
+**Resposta (204 No Content):**  
+Senha alterada com sucesso.
+
+#### Resposta de Erro (ProblemDetail - RFC 7807)
+
+**Exemplo - Usuário não encontrado (404):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/resource-not-found",
+  "title": "Recurso não encontrado",
+  "status": 404,
+  "detail": "Usuário com ID 999 não encontrado",
+  "timestamp": "2024-01-15T14:30:00",
+  "path": "/v1/users/999"
+}
+```
+
+**Exemplo - Validação de entrada (400):**
+```json
+{
+  "type": "https://api.food-backend.com/problems/validation-error",
+  "title": "Erro de validação",
+  "status": 400,
+  "detail": "Erros de validação encontrados",
+  "timestamp": "2024-01-15T14:30:00",
+  "path": "/v1/users",
+  "errors": [
+    {
+      "field": "email",
+      "message": "Email inválido"
+    },
+    {
+      "field": "password",
+      "message": "A senha deve ter no mínimo 6 caracteres"
+    }
+  ]
+}
+```
+
+## 4. Configuração do Projeto
+
+### Configuração do Docker Compose
+
+O arquivo `docker-compose.yml` orquestra dois serviços principais: o banco de dados PostgreSQL e a aplicação Spring Boot.
+
+**Serviço PostgreSQL (`postgres`):**
+- Imagem: `postgres:16-alpine`
 - Container: `food-postgres`
-- Porta: `5432:5432` (mapeada para o host)
+- Porta: `5432:5432`
 - Variáveis de ambiente:
   - `POSTGRES_DB=food_db`
   - `POSTGRES_USER=postgres`
   - `POSTGRES_PASSWORD=postgres`
-- Volume persistente: `postgres_data` montado em `/var/lib/postgresql/data` para preservar dados entre reinicializações
-- Health check configurado: `pg_isready -U postgres` verifica a disponibilidade a cada 10 segundos
+- Volume persistente: `postgres_data` montado em `/var/lib/postgresql/data`
+- Health check: `pg_isready -U postgres` verifica disponibilidade a cada 10 segundos
 
-**Aplicação Spring Boot (`app`):**
+**Serviço Aplicação (`app`):**
 - Build: Utiliza o `Dockerfile` local para construir a imagem
 - Container: `food-app`
 - Dependência: Aguarda o serviço `postgres` estar saudável (`condition: service_healthy`)
 - Variáveis de ambiente:
-  - `DB_HOST=postgres` (nome do serviço no Docker Compose)
+  - `DB_HOST=postgres`
   - `DB_PORT=5432`
   - `DB_NAME=food_db`
   - `DB_USER=postgres`
   - `DB_PASSWORD=postgres`
-  - `SERVER_PORT=8080` (porta interna do container)
+  - `SERVER_PORT=8080`
 - Porta: `8081:8080` (mapeia porta 8081 do host para 8080 do container)
 
-### Dockerfile
+O `Dockerfile` utiliza multi-stage build para otimizar o tamanho da imagem final: primeiro stage compila a aplicação com Maven, segundo stage executa apenas o JAR gerado usando JRE.
 
-O `Dockerfile` utiliza multi-stage build para otimizar o tamanho da imagem final:
+![Docker - Containers em execução](assets/docker/evidencia_1.png)
 
-**Stage 1 (build):**
-- Base: `maven:3.9-eclipse-temurin-21`
-- Copia `pom.xml` primeiro (aproveita cache do Docker)
-- Copia código fonte
-- Executa `mvn clean package -DskipTests` para construir o JAR
+![Docker - Detalhes dos containers](assets/docker/evidencia_2.png)
 
-**Stage 2 (runtime):**
-- Base: `eclipse-temurin:21-jre` (apenas JRE, menor que JDK completo)
-- Copia o JAR gerado do stage anterior
-- Expõe porta 8080
-- Define `ENTRYPOINT` para executar o JAR com `java -jar app.jar`
+### Instruções para Execução Local
 
-### Comandos para Execução
+**Pré-requisitos:**
+- Docker e Docker Compose instalados
+- Maven 3.9+ (opcional, para execução local sem Docker)
+- Java 21 (opcional, para execução local sem Docker)
+- PostgreSQL 16 (opcional, para execução local sem Docker)
 
-**1. Construir e iniciar todos os serviços:**
+**Opção 1: Execução com Docker Compose (Recomendado)**
+
+1. Navegue até o diretório do projeto:
 ```bash
 cd food-backend
+```
+
+2. Construa e inicie todos os serviços:
+```bash
 docker-compose up --build
 ```
 
-O flag `--build` força a reconstrução das imagens, útil na primeira execução ou após alterações no código.
-
-**2. Executar em background (detached mode):**
+3. Para executar em background (detached mode):
 ```bash
 docker-compose up -d --build
 ```
 
-**3. Visualizar logs:**
-```bash
-# Logs de todos os serviços
-docker-compose logs -f
+4. Acesse a aplicação:
+   - **API Base:** http://localhost:8081
+   - **Swagger UI:** http://localhost:8081/swagger-ui.html
+   - **OpenAPI JSON:** http://localhost:8081/api-docs
 
-# Logs apenas da aplicação
-docker-compose logs -f app
-
-# Logs apenas do PostgreSQL
-docker-compose logs -f postgres
-```
-
-**4. Parar os serviços:**
+5. Para parar os serviços:
 ```bash
 docker-compose down
 ```
 
-**5. Parar e remover volumes (apaga dados do banco):**
+**Opção 2: Execução Local com Maven**
+
+1. Configure o banco de dados PostgreSQL:
+   - Crie um banco de dados chamado `food_db`
+   - Configure as credenciais em `application.properties` ou variáveis de ambiente
+
+2. Execute a aplicação:
 ```bash
-docker-compose down -v
+cd food-backend
+./mvnw spring-boot:run
 ```
 
-**6. Reconstruir apenas a aplicação (útil durante desenvolvimento):**
-```bash
-docker-compose build app
-docker-compose up -d app
-```
+3. Acesse a aplicação:
+   - **API Base:** http://localhost:8080
+   - **Swagger UI:** http://localhost:8080/swagger-ui.html
+   - **OpenAPI JSON:** http://localhost:8080/api-docs
 
-### Verificação da Aplicação
+**Variáveis de Ambiente (opcional):**
 
-Após subir os containers, aguarde alguns segundos para a aplicação inicializar completamente. Acesse:
+Se executando localmente, você pode configurar as seguintes variáveis de ambiente:
 
-- **API Swagger UI:** http://localhost:8081/swagger-ui.html
-- **OpenAPI JSON:** http://localhost:8081/api-docs
-- **Health check manual:** `curl http://localhost:8081/v1/users` (deve retornar 401 se não autenticado, confirmando que a API está respondendo)
+- `DB_HOST` - Host do banco de dados (padrão: `localhost`)
+- `DB_PORT` - Porta do banco de dados (padrão: `5432`)
+- `DB_NAME` - Nome do banco de dados (padrão: `food_db`)
+- `DB_USER` - Usuário do banco de dados (padrão: `postgres`)
+- `DB_PASSWORD` - Senha do banco de dados (padrão: `postgres`)
+- `SERVER_PORT` - Porta da aplicação (padrão: `8080`)
 
-### Troubleshooting
+## 5. Qualidade do Código
 
-Se a aplicação falhar ao conectar ao banco, verifique:
-```bash
-# Status dos containers
-docker-compose ps
+### Boas Práticas Utilizadas
 
-# Logs da aplicação procurando por erros de conexão
-docker-compose logs app | grep -i "database\|connection\|jdbc"
+**1. Separação de Responsabilidades (SRP - Single Responsibility Principle):**
+- Controllers focam apenas em receber requisições HTTP e formatar respostas
+- Services contêm toda a lógica de negócio isolada
+- Repositories gerenciam apenas acesso a dados
+- Mappers centralizam transformações entre DTOs e entidades
 
-# Testar conectividade do container app para o postgres
-docker-compose exec app ping postgres
-```
+**2. Arquitetura em Camadas:**
+- Separação clara entre camadas de apresentação, domínio, serviços e infraestrutura
+- Baixo acoplamento entre camadas através de interfaces
+- Alta coesão dentro de cada camada
 
-Para limpar completamente e recomeçar:
-```bash
-docker-compose down -v
-docker system prune -f
-docker-compose up --build
-```
+**3. Padrão de Interfaces dos Controllers:**
+- Interfaces (`*ControllerApi`) definem o contrato da API com todas as anotações (Spring Web, Validação, Documentação)
+- Classes de implementação mantêm apenas a lógica de negócio
+- Facilita testabilidade, manutenibilidade e documentação centralizada
+
+**4. DRY (Don't Repeat Yourself):**
+- Lógica de transformação centralizada no `UserMapper`
+- Tratamento de exceções centralizado no `GlobalExceptionHandler`
+- Validações reutilizáveis através de Bean Validation
+- Código de negócio compartilhado entre V1 e V2 (apenas camada de apresentação duplicada)
+
+**5. SOLID Principles:**
+- **Single Responsibility**: Cada classe tem uma responsabilidade única e bem definida
+- **Open/Closed**: Extensível através de interfaces e herança, fechado para modificação
+- **Liskov Substitution**: Interfaces implementadas corretamente por classes concretas
+- **Interface Segregation**: Interfaces específicas para cada controller
+- **Dependency Inversion**: Controllers dependem de abstrações (interfaces) ao invés de implementações concretas
+
+**6. Tratamento Padronizado de Erros:**
+- Todas as exceções convertidas para `ProblemDetail` (RFC 7807)
+- Formato consistente de respostas de erro em toda a API
+- Informações detalhadas de validação quando aplicável
+
+**7. Segurança:**
+- Senhas hashadas com BCrypt (salt automático)
+- Separação explícita entre atualização de dados cadastrais e alteração de senha
+- Validação de senha atual antes de permitir alteração
+- Autenticação através de sessão HTTP (V1) ou JWT (V2)
+- Proteção de endpoints através de interceptadores e filtros
+
+**8. Validações em Múltiplas Camadas:**
+- **Validações de Entrada (Bean Validation)**: Nos DTOs, garantindo formato e estrutura
+- **Validações de Domínio**: No service, garantindo regras de negócio (unicidade, existência, etc.)
+
+**9. Documentação Automática:**
+- Swagger/OpenAPI 3.0 com documentação interativa
+- Anotações detalhadas em cada endpoint
+- Exemplos de requisição e resposta
+- Separação de versões (V1 e V2) no Swagger
+
+**10. Testes e Cobertura:**
+- Suíte completa de testes automatizados (unitários e de integração)
+- JaCoCo configurado com meta mínima de 80% de cobertura de linhas
+- Testes de controllers, services, mappers, interceptors, handlers e configurações
+- Build falha se cobertura ficar abaixo do mínimo
+
+**11. Convenções do Spring Boot:**
+- Uso de `@RequiredArgsConstructor` (Lombok) para injeção de dependências
+- Configuração automática através de `application.properties`
+- JPA Auditing para campos de auditoria (`createdAt`, `lastUpdated`)
+- Uso adequado de `@Transactional` onde necessário
+
+**12. Versionamento de API:**
+- Coexistência de duas versões (V1 e V2) sem impacto em clientes existentes
+- Migração gradual permitida
+- Código de negócio compartilhado entre versões
+
+#### Relatório de Cobertura JaCoCo
+
+![Relatório de Cobertura JaCoCo](assets/jacoco/cobertura.png)
+
+## 6. Collections para Teste
+
+### Link para a Collection do Postman
+
+A coleção completa do Postman está disponível no arquivo `Food_Backend.json` na raiz do projeto. Esta coleção contém todos os cenários de teste organizados em pastas.
+
+**Como importar:**
+1. Abra o Postman
+2. Clique em "Import" (canto superior esquerdo)
+3. Selecione o arquivo `Food_Backend.json`
+4. Configure a variável de ambiente `base_url`:
+   - Execução local (Maven): `http://localhost:8080`
+   - Execução Docker: `http://localhost:8081`
+
+### Descrição dos Testes Manuais
+
+A coleção do Postman está organizada nas seguintes categorias:
+
+**0. Autenticação:**
+- Login com sucesso
+- Login com senha incorreta
+- Login com usuário não encontrado
+- Validações de login e senha vazios
+- Logout
+- Acesso não autorizado (sem login e após logout)
+
+**1. ResourceNotFoundException (404):**
+- Buscar usuário por ID/email/login inexistente
+- Atualizar/deletar/alterar senha de usuário inexistente
+
+**2. DomainValidationException (400):**
+- Criar usuário com email duplicado
+- Alterar senha com senha atual igual a nova senha
+
+**3. MethodArgumentNotValidException (400):**
+- Criar/atualizar usuário com campos vazios ou inválidos
+- Alterar senha com validações de entrada
+
+**4. Novos Tratamentos de Erro:**
+- Endpoints inexistentes (404)
+- IDs com tipo inválido (400)
+- Parâmetros faltando (400)
+- Content-Type não suportado (415)
+- JSON malformado (400)
+- Método HTTP não suportado (405)
+
+**5. Casos de Sucesso:**
+- Criar usuário válido
+- Listar todos os usuários
+- Buscar usuário por ID/nome/email/login
+- Atualizar usuário
+- Alterar senha
+- Deletar usuário
+
+**6. Endpoints V2 - JWT Authentication:**
+- Autenticação V2 (login/logout com JWT)
+- Casos de sucesso V2 (todos os endpoints protegidos)
+- Erros V2 (validações e exceções retornando ProblemDetail)
+
+**Documentação Swagger:**
+
+A documentação interativa está disponível em:
+- **V1:** http://localhost:8080/swagger-ui.html (grupo "v1")
+- **V2:** http://localhost:8080/swagger-ui.html (grupo "v2")
+
+![Swagger V1 - Visão geral](assets/swagger/v1/evidencia_1.png)
+
+![Swagger V2 - Visão geral](assets/swagger/v2/evidencia_1.png)
+
+**Fluxo de Teste Recomendado:**
+
+1. Importe a coleção do Postman
+2. Execute "POST - Criar usuário válido (público)" para criar um usuário
+3. Execute "POST - Login (sucesso)" para autenticar e criar sessão
+4. Teste os endpoints protegidos (GET, PUT, PATCH, DELETE)
+5. Execute "POST - Logout" para encerrar sessão
+6. Verifique que tentativas de acesso após logout retornam 401
+7. Para V2, execute login e use o token JWT retornado no header `Authorization: Bearer {token}`
+
+## 7. Repositório do Código
+
+### URL do Repositório
+
+**GitHub:** [https://github.com/thiagohaf/Food-Backend](https://github.com/thiagohaf/Food-Backend)
+
+O repositório contém:
+- Código-fonte completo do projeto
+- Arquivo `Food_Backend.json` com a coleção do Postman
+- Documentação adicional (README.md, POSTMAN_TEST_GUIDE.md)
+- Configurações Docker (docker-compose.yml, Dockerfile)
+- Testes automatizados com cobertura JaCoCo
 
 ---
 
 ## Considerações Finais
 
-Este relatório técnico documenta o desenvolvimento do sistema de gestão de restaurantes, desde a arquitetura e modelagem de dados até a infraestrutura Docker. O projeto demonstra a aplicação de conceitos importantes como separação de responsabilidades, tratamento padronizado de erros, documentação automática de APIs, validações em múltiplas camadas e containerização.
+Este relatório técnico documenta o desenvolvimento do sistema de gestão de restaurantes, demonstrando a aplicação de conceitos importantes como separação de responsabilidades, tratamento padronizado de erros (RFC 7807), documentação automática de APIs, validações em múltiplas camadas, segurança com hashing de senhas (BCrypt) e containerização através de Docker.
 
-A escolha de tecnologias modernas como Spring Boot 4.0.1, Java 21, PostgreSQL e Docker garante que a aplicação esteja preparada para escalabilidade e manutenção futura. A coexistência de duas versões da API (V1 com sessão HTTP e V2 com JWT) permite migração gradual sem impactar clientes existentes. O sistema abrangente de validações implementado (Bean Validation e regras de domínio) garante a integridade dos dados em todas as camadas da aplicação.
+A escolha de tecnologias modernas como Spring Boot 4.0.1, Java 21, PostgreSQL e Docker garante que a aplicação esteja preparada para escalabilidade e manutenção futura. A coexistência de duas versões da API (V1 com sessão HTTP e V2 com JWT) permite migração gradual sem impactar clientes existentes, enquanto o sistema abrangente de validações implementado garante a integridade dos dados em todas as camadas da aplicação.
 
-Todos os códigos-fonte, documentação adicional e coleções de testes estão disponíveis no repositório público do GitHub: [https://github.com/thiagohaf/Food-Backend](https://github.com/thiagohaf/Food-Backend)
+O projeto alcança mais de 80% de cobertura de código através de testes automatizados, seguindo boas práticas de desenvolvimento como SOLID, DRY e arquitetura em camadas, resultando em um código limpo, testável e manutenível.

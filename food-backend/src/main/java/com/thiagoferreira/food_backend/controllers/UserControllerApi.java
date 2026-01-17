@@ -65,19 +65,17 @@ public interface UserControllerApi {
     @GetMapping("/search/name")
     @Operation(
             summary = "Search users by name",
-            description = "Searches users by name (partial match, case-insensitive). Requires authentication (valid session)."
+            description = "Searches users by name (partial match, case-insensitive). If no name is provided, returns all users. Requires authentication (valid session)."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Users found successfully"),
-            @ApiResponse(responseCode = "400", description = "Missing required parameter",
-                    content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required",
                     content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error",
                     content = @Content(schema = @Schema(implementation = ProblemDetailDTO.class)))
     })
     ResponseEntity<List<UserResponse>> searchByName(
-            @RequestParam String name
+            @RequestParam(required = false) String name
     );
 
     @GetMapping("/search/login")
