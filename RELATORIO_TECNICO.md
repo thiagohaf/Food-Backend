@@ -99,6 +99,7 @@ food-backend/
 ├── Dockerfile                                      # Imagem Docker
 └── pom.xml                                         # Configuração Maven
 ```
+*Nota: Estrutura de projeto gerada utilizando o GPT-5.2*
 
 ### Diagrama da Arquitetura
 
@@ -127,13 +128,14 @@ A arquitetura em camadas pode ser visualizada através da seguinte estrutura:
 │  Exception Handler (ProblemDetail)                      │
 └─────────────────────────────────────────────────────────┘
 ```
+*Nota: Diagrama gerado utilizando o GPT-5.2*
+
 
 #### Diagrama Visual da Arquitetura
 
 O diagrama visual abaixo ilustra a arquitetura completa do sistema, incluindo as camadas, componentes principais e fluxo de dados. Este diagrama foi gerado utilizando o DiagramGPT da Eraser.
 
 ![Diagrama da Arquitetura do Sistema](assets/diagram/diagrama.png)
-
 *Nota: Diagrama gerado utilizando o DiagramGPT da Eraser (https://eraser.io)*
 
 #### Estrutura do Banco de Dados PostgreSQL
